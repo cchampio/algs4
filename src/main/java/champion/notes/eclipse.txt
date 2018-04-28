@@ -1,0 +1,29 @@
+How to create an Eclipse project for algs4.
+
+	1. Start Eclipse
+	2. Type 'C:\projects\algs4' as the workspace directory where algs4 is the root of the algs4 repo.
+	3. Click Launch.
+	4. Click File | New | Project . . . 
+		1. Select Java Project and then click Next.
+		2. In the Project name field type algs4.
+		3. Select Create separate folders for sources and class files.
+		4. Click Next.
+		5. You will add the algs4 source code in a later step so go ahead and click Finish. 
+
+	5. Now you need to add the algs4 source code. In order to do that we must first delete the current algs4/src folder from both the disk and from Project Explorer.
+		1. In Project Explorer right click the algs4/src folder and then click Delete. This should also remove it from disk in the algs4 project directory.
+		2. Select algs4 and type Alt+Enter to open the Properties window.
+		3. Select Java Build Path.
+		4. Select the Source tab.
+		5. Click the Link Source button.
+		6. In the Linked folder location text box type or browse to the location of the Linked folder that contains the desired algs4 source. E.g. 'WORKSPACE/src/main/java'.
+		7. In the Folder name field type 'src'. 
+		8. Click Next.
+		9. Click Finish.
+		10. Click Apply and Close.
+		11. In Project Explorer verify that you now have a src directory containing the desired source code. Refresh Project Explorer if necessary to see the code.
+
+	6. Verify that you can build and run. 
+		1. Open Bag.java. You may need to add a println to see a message. 
+		2. Clean build and run. 
+
