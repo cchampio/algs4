@@ -26,8 +26,8 @@ build/
 
 ### Eclipse project file ###
 .metadata
-.classpath
-.project
+#.classpath
+#.project
 .settings/
 bin/
 tmp/
