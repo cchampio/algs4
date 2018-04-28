@@ -9,7 +9,7 @@ public class helloalgs4 {
 		stack.push("algs4!");
 		stack.push("Hello");
 
-		while (stack.size() > 0) {
+		while (!stack.isEmpty()) {
 			System.out.print(stack.pop());
 			if (stack.size() > 0) {
 				System.out.print(" ");
