@@ -9,7 +9,7 @@
  *
  *  Compute a minimum spanning forest using Prim's algorithm.
  *
- *  %  java PrimMST tinyEWG.txt 
+ *  %  java PrimMST tinyEWG.txt
  *  1-7 0.19000
  *  0-2 0.26000
  *  2-3 0.17000
@@ -44,17 +44,24 @@ package edu.princeton.cs.algs4;
  *  The edge weights can be positive, zero, or negative and need not
  *  be distinct. If the graph is not connected, it computes a <em>minimum
  *  spanning forest</em>, which is the union of minimum spanning trees
- *  in each connected component. The {@code weight()} method returns the 
+ *  in each connected component. The {@code weight()} method returns the
  *  weight of a minimum spanning tree and the {@code edges()} method
  *  returns its edges.
  *  <p>
  *  This implementation uses <em>Prim's algorithm</em> with an indexed
  *  binary heap.
- *  The constructor takes time proportional to <em>E</em> log <em>V</em>
- *  and extra space (not including the graph) proportional to <em>V</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Afterwards, the {@code weight()} method takes constant time
- *  and the {@code edges()} method takes time proportional to <em>V</em>.
+ *  The constructor takes &Theta;(<em>E</em> log <em>V</em>) time in
+ *  the worst case, where <em>V</em> is the number of
+ *  vertices and <em>E</em> is the number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the
+ *  edge-weighted graph).
+ *  <p>
+ *  This {@code weight()} method correctly computes the weight of the MST
+ *  if all arithmetic performed is without floating-point rounding error
+ *  or arithmetic overflow.
+ *  This is the case if all edge weights are non-negative integers
+ *  and the weight of the MST does not exceed 2<sup>52</sup>.
  *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/43mst">Section 4.3</a> of
@@ -66,7 +73,7 @@ package edu.princeton.cs.algs4;
  *  @author Kevin Wayne
  */
 public class PrimMST {
-    private static final double FLOATING_POINT_EPSILON = 1E-12;
+    private static final double FLOATING_POINT_EPSILON = 1.0E-12;
 
     private Edge[] edgeTo;        // edgeTo[v] = shortest edge from tree vertex to non-tree vertex
     private double[] distTo;      // distTo[v] = weight of shortest such edge
@@ -162,7 +169,7 @@ public class PrimMST {
         UF uf = new UF(G.V());
         for (Edge e : edges()) {
             int v = e.either(), w = e.other(v);
-            if (uf.connected(v, w)) {
+            if (uf.find(v) == uf.find(w)) {
                 System.err.println("Not a forest");
                 return false;
             }
@@ -172,7 +179,7 @@ public class PrimMST {
         // check that it is a spanning forest
         for (Edge e : G.edges()) {
             int v = e.either(), w = e.other(v);
-            if (!uf.connected(v, w)) {
+            if (uf.find(v) != uf.find(w)) {
                 System.err.println("Not a spanning forest");
                 return false;
             }
@@ -191,7 +198,7 @@ public class PrimMST {
             // check that e is min weight edge in crossing cut
             for (Edge f : G.edges()) {
                 int x = f.either(), y = f.other(x);
-                if (!uf.connected(x, y)) {
+                if (uf.find(x) != uf.find(y)) {
                     if (f.weight() < e.weight()) {
                         System.err.println("Edge " + f + " violates cut optimality conditions");
                         return false;
@@ -223,7 +230,7 @@ public class PrimMST {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

@@ -4,24 +4,18 @@
  *  Dependencies: StdOut.java StdIn.java
  *  Data files:   https://algs4.cs.princeton.edu/21elementary/tiny.txt
  *                https://algs4.cs.princeton.edu/21elementary/words3.txt
- *   
+ *
  *  Sorts a sequence of strings from standard input using shellsort.
  *
- *  Uses increment sequence proposed by Sedgewick and Incerpi.
- *  The nth element of the sequence is the smallest integer >= 2.5^n
- *  that is relatively prime to all previous terms in the sequence.
- *  For example, incs[4] is 41 because 2.5^4 = 39.0625 and 41 is
- *  the next integer that is relatively prime to 3, 7, and 16.
- *   
  *  % more tiny.txt
  *  S O R T E X A M P L E
  *
  *  % java Shell < tiny.txt
  *  A E E L M O P R S T X                 [ one string per line ]
- *    
+ *
  *  % more words3.txt
  *  bed bug dad yes zoo ... all bad yet
- *  
+ *
  *  % java Shell < words3.txt
  *  all bad bed bug dad ... yes yet zoo    [ one string per line ]
  *
@@ -32,11 +26,19 @@ package edu.princeton.cs.algs4;
 
 /**
  *  The {@code Shell} class provides static methods for sorting an
- *  array using Shellsort with Knuth's increment sequence (1, 4, 13, 40, ...).
+ *  array using <em>Shellsort</em> with
+ *  <a href = "https://oeis.org/A003462"> Knuth's increment sequence</a>
+ *  (1, 4, 13, 40, ...). In the worst case, this implementation makes
+ *  &Theta;(<em>n</em><sup>3/2</sup>) compares and exchanges to sort
+ *  an array of length <em>n</em>.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a> of
+ *  This sorting algorithm is not stable.
+ *  It uses &Theta;(1) extra memory (not including the input array).
+ *  <p>
+ *  For additional documentation, see
+ *  <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
- *  
+ *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
@@ -52,9 +54,9 @@ public class Shell {
     public static void sort(Comparable[] a) {
         int n = a.length;
 
-        // 3x+1 increment sequence:  1, 4, 13, 40, 121, 364, 1093, ... 
+        // 3x+1 increment sequence:  1, 4, 13, 40, 121, 364, 1093, ...
         int h = 1;
-        while (h < n/3) h = 3*h + 1; 
+        while (h < n/3) h = 3*h + 1;
 
         while (h >= 1) {
             // h-sort the array
@@ -63,7 +65,7 @@ public class Shell {
                     exch(a, j, j-h);
                 }
             }
-            assert isHsorted(a, h); 
+            assert isHsorted(a, h);
             h /= 3;
         }
         assert isSorted(a);
@@ -74,12 +76,12 @@ public class Shell {
    /***************************************************************************
     *  Helper sorting functions.
     ***************************************************************************/
-    
+
     // is v < w ?
     private static boolean less(Comparable v, Comparable w) {
         return v.compareTo(w) < 0;
     }
-        
+
     // exchange a[i] and a[j]
     private static void exch(Object[] a, int i, int j) {
         Object swap = a[i];
@@ -112,8 +114,8 @@ public class Shell {
     }
 
     /**
-     * Reads in a sequence of strings from standard input; Shellsorts them; 
-     * and prints them to standard output in ascending order. 
+     * Reads in a sequence of strings from standard input; Shellsorts them;
+     * and prints them to standard output in ascending order.
      *
      * @param args the command-line arguments
      */
@@ -126,7 +128,7 @@ public class Shell {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

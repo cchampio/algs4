@@ -26,15 +26,23 @@ package edu.princeton.cs.algs4;
  *  or a negative cycle.
  *  <p>
  *  This implementation uses the Floyd-Warshall algorithm.
- *  The constructor takes time proportional to <em>V</em><sup>3</sup> in the
- *  worst case, where <em>V</em> is the number of vertices.
- *  Afterwards, the {@code dist()}, {@code hasPath()}, and {@code hasNegativeCycle()}
- *  methods take constant time; the {@code path()} and {@code negativeCycle()}
- *  method takes time proportional to the number of edges returned.
+ *  The constructor takes &Theta;(<em>V</em><sup>3</sup>) time,
+ *  where <em>V</em> is the number of vertices.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em><sup>2</sup>) extra space
+ *  (not including the edge-weighted digraph).
  *  <p>
- *  For additional documentation,    
- *  see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of    
- *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne. 
+ *  This correctly computes shortest paths if all arithmetic performed is
+ *  without floating-point rounding error or arithmetic overflow.
+ *  This is the case if all edge weights are integers and if none of the
+ *  intermediate results exceeds 2<sup>52</sup>. Since all intermediate
+ *  results are sums of edge weights, they are bounded by <em>V C</em>,
+ *  where <em>V</em> is the number of vertices and <em>C</em> is the maximum
+ *  absolute value of any edge weight.
+ *  <p>
+ *  For additional documentation,
+ *  see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of
+ *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
@@ -45,7 +53,7 @@ public class FloydWarshall {
     private DirectedEdge[][] edgeTo;   // edgeTo[v][w] = last edge on shortest v->w path
 
     /**
-     * Computes a shortest paths tree from each vertex to to every other vertex in
+     * Computes a shortest paths tree from each vertex to every other vertex in
      * the edge-weighted digraph {@code G}. If no such shortest path exists for
      * some pair of vertices, it computes a negative cycle.
      * @param G the edge-weighted digraph
@@ -219,9 +227,9 @@ public class FloydWarshall {
         int E = Integer.parseInt(args[1]);
         AdjMatrixEdgeWeightedDigraph G = new AdjMatrixEdgeWeightedDigraph(V);
         for (int i = 0; i < E; i++) {
-            int v = StdRandom.uniform(V);
-            int w = StdRandom.uniform(V);
-            double weight = Math.round(100 * (StdRandom.uniform() - 0.15)) / 100.0;
+            int v = StdRandom.uniformInt(V);
+            int w = StdRandom.uniformInt(V);
+            double weight = 0.01 * StdRandom.uniformInt(-15, 100);
             if (v == w) G.addEdge(new DirectedEdge(v, w, Math.abs(weight)));
             else G.addEdge(new DirectedEdge(v, w, weight));
         }
@@ -276,7 +284,7 @@ public class FloydWarshall {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

@@ -28,7 +28,7 @@ package edu.princeton.cs.algs4;
  *  ASCII alphabet.
  *  <p>
  *  For additional documentation,
- *  see <a href="https://algs4.cs.princeton.edu/55compress">Section 5.5</a> of
+ *  see <a href="https://algs4.cs.princeton.edu/55compression">Section 5.5</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
@@ -116,17 +116,11 @@ public class Huffman {
     // build the Huffman trie given frequencies
     private static Node buildTrie(int[] freq) {
 
-        // initialze priority queue with singleton trees
+        // initialize priority queue with singleton trees
         MinPQ<Node> pq = new MinPQ<Node>();
-        for (char i = 0; i < R; i++)
-            if (freq[i] > 0)
-                pq.insert(new Node(i, freq[i], null, null));
-
-        // special case in case there is only one character with a nonzero frequency
-        if (pq.size() == 1) {
-            if (freq['\0'] == 0) pq.insert(new Node('\0', 0, null, null));
-            else                 pq.insert(new Node('\1', 0, null, null));
-        }
+        for (char c = 0; c < R; c++)
+            if (freq[c] > 0)
+                pq.insert(new Node(c, freq[c], null, null));
 
         // merge two smallest trees
         while (pq.size() > 1) {
@@ -169,7 +163,7 @@ public class Huffman {
     public static void expand() {
 
         // read in Huffman trie from input stream
-        Node root = readTrie(); 
+        Node root = readTrie();
 
         // number of bytes to write
         int length = BinaryStdIn.readInt();
@@ -213,7 +207,7 @@ public class Huffman {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

@@ -11,7 +11,7 @@
 package edu.princeton.cs.algs4;
 
 /**
- *  The {@code DirectedCycleX} class represents a data type for 
+ *  The {@code DirectedCycleX} class represents a data type for
  *  determining whether a digraph has a directed cycle.
  *  The <em>hasCycle</em> operation determines whether the digraph has
  *  a simple directed cycle and, if so, the <em>cycle</em> operation
@@ -20,10 +20,10 @@ package edu.princeton.cs.algs4;
  *  This implementation uses a nonrecursive, queue-based algorithm.
  *  The constructor takes time proportional to <em>V</em> + <em>E</em>
  *  (in the worst case),
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Afterwards, the <em>hasCycle</em> operation takes constant time;
- *  the <em>cycle</em> operation takes time proportional
- *  to the length of the cycle.
+ *  where <em>V</em> is the number of vertices and <em>E</em> is the
+ *  number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  <p>
  *  See {@link DirectedCycle} for a recursive version that uses depth-first search.
  *  See {@link Topological} or {@link TopologicalX} to compute a topological order
@@ -144,8 +144,8 @@ public class DirectedCycleX {
 
         // add F extra edges
         for (int i = 0; i < F; i++) {
-            int v = StdRandom.uniform(V);
-            int w = StdRandom.uniform(V);
+            int v = StdRandom.uniformInt(V);
+            int w = StdRandom.uniformInt(V);
             G.addEdge(v, w);
         }
 
@@ -170,7 +170,7 @@ public class DirectedCycleX {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

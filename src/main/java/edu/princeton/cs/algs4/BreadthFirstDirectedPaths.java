@@ -29,20 +29,19 @@
 package edu.princeton.cs.algs4;
 
 /**
- *  The {@code BreadthDirectedFirstPaths} class represents a data type for finding
- *  shortest paths (number of edges) from a source vertex <em>s</em>
+ *  The {@code BreadthDirectedFirstPaths} class represents a data type for
+ *  finding shortest paths (number of edges) from a source vertex <em>s</em>
  *  (or set of source vertices) to every other vertex in the digraph.
  *  <p>
  *  This implementation uses breadth-first search.
- *  The constructor takes time proportional to <em>V</em> + <em>E</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Each call to {@link #distTo(int)} and {@link #hasPathTo(int)} takes constant time;
- *  each call to {@link #pathTo(int)} takes time proportional to the length
- *  of the path.
- *  It uses extra space (not including the digraph) proportional to <em>V</em>.
+ *  The constructor takes &Theta;(<em>V</em> + <em>E</em>) time in the
+ *  worst case, where <em>V</em> is the number of vertices and <em>E</em> is
+ *  the number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the digraph).
  *  <p>
- *  For additional documentation, 
- *  see <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of 
+ *  For additional documentation,
+ *  see <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
@@ -75,6 +74,8 @@ public class BreadthFirstDirectedPaths {
      * to every other vertex in graph {@code G}.
      * @param G the digraph
      * @param sources the source vertices
+     * @throws IllegalArgumentException if {@code sources} is {@code null}
+     * @throws IllegalArgumentException if {@code sources} contains no vertices
      * @throws IllegalArgumentException unless each vertex {@code v} in
      *         {@code sources} satisfies {@code 0 <= v < V}
      */
@@ -143,7 +144,8 @@ public class BreadthFirstDirectedPaths {
      * Returns the number of edges in a shortest path from the source {@code s}
      * (or sources) to vertex {@code v}?
      * @param v the vertex
-     * @return the number of edges in a shortest path
+     * @return the number of edges in such a shortest path
+     *         (or {@code Integer.MAX_VALUE} if there is no such path)
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int distTo(int v) {
@@ -177,19 +179,24 @@ public class BreadthFirstDirectedPaths {
             throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
+    // throw an IllegalArgumentException if vertices is null, has zero vertices,
+    // or has a vertex not between 0 and V-1
     private void validateVertices(Iterable<Integer> vertices) {
         if (vertices == null) {
             throw new IllegalArgumentException("argument is null");
         }
-        int V = marked.length;
-        for (int v : vertices) {
-            if (v < 0 || v >= V) {
-                throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
+        int vertexCount = 0;
+        for (Integer v : vertices) {
+            vertexCount++;
+            if (v == null) {
+                throw new IllegalArgumentException("vertex is null");
             }
+            validateVertex(v);
+        }
+        if (vertexCount == 0) {
+            throw new IllegalArgumentException("zero vertices");
         }
     }
-
 
     /**
      * Unit tests the {@code BreadthFirstDirectedPaths} data type.
@@ -225,7 +232,7 @@ public class BreadthFirstDirectedPaths {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

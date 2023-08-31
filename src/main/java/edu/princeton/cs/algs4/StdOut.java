@@ -15,12 +15,16 @@ import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
 /**
- *  This class provides methods for printing strings and numbers to standard output.
- *  <p>
- *  <b>Getting started.</b>
+ *  <p><b>Overview.</b>
+ *  The {@code StdOut} class provides methods for printing strings and numbers
+ *  to standard output.
+ *
+ *  <p><b>Getting started.</b>
  *  To use this class, you must have {@code StdOut.class} in your
  *  Java classpath. If you used our autoinstaller, you should be all set.
- *  Otherwise, download
+ *  Otherwise, either download
+ *  <a href = "https://introcs.cs.princeton.edu/java/code/stdlib.jar">stdlib.jar</a>
+ *  and add to your Java classpath or download
  *  <a href = "https://introcs.cs.princeton.edu/java/stdlib/StdOut.java">StdOut.java</a>
  *  and put a copy in your working directory.
  *  <p>
@@ -82,17 +86,6 @@ public final class StdOut {
 
     // don't instantiate
     private StdOut() { }
-
-   /**
-     * Closes standard output.
-     * @deprecated Calling close() permanently disables standard output;
-     *             subsequent calls to StdOut.println() or System.out.println()
-     *             will no longer produce output on standard output.
-     */
-    @Deprecated
-    public static void close() {
-        out.close();
-    }
 
    /**
      * Terminates the current line by printing the line-separator string.
@@ -193,7 +186,7 @@ public final class StdOut {
 
    /**
      * Prints an object to standard output and flushes standard output.
-     * 
+     *
      * @param x the object to print
      */
     public static void print(Object x) {
@@ -203,7 +196,7 @@ public final class StdOut {
 
    /**
      * Prints a boolean to standard output and flushes standard output.
-     * 
+     *
      * @param x the boolean to print
      */
     public static void print(boolean x) {
@@ -213,7 +206,7 @@ public final class StdOut {
 
    /**
      * Prints a character to standard output and flushes standard output.
-     * 
+     *
      * @param x the character to print
      */
     public static void print(char x) {
@@ -223,7 +216,7 @@ public final class StdOut {
 
    /**
      * Prints a double to standard output and flushes standard output.
-     * 
+     *
      * @param x the double to print
      */
     public static void print(double x) {
@@ -233,7 +226,7 @@ public final class StdOut {
 
    /**
      * Prints a float to standard output and flushes standard output.
-     * 
+     *
      * @param x the float to print
      */
     public static void print(float x) {
@@ -243,7 +236,7 @@ public final class StdOut {
 
    /**
      * Prints an integer to standard output and flushes standard output.
-     * 
+     *
      * @param x the integer to print
      */
     public static void print(int x) {
@@ -253,7 +246,7 @@ public final class StdOut {
 
    /**
      * Prints a long integer to standard output and flushes standard output.
-     * 
+     *
      * @param x the long integer to print
      */
     public static void print(long x) {
@@ -263,7 +256,7 @@ public final class StdOut {
 
    /**
      * Prints a short integer to standard output and flushes standard output.
-     * 
+     *
      * @param x the short integer to print
      */
     public static void print(short x) {
@@ -308,7 +301,7 @@ public final class StdOut {
     }
 
    /**
-     * Unit tests some of the methods in {@code StdOut}.
+     * Unit tests some methods in {@code StdOut}.
      *
      * @param args the command-line arguments
      */
@@ -324,7 +317,7 @@ public final class StdOut {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

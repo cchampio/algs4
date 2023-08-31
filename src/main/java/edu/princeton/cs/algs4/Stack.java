@@ -10,8 +10,8 @@
  *  This version uses a static nested class Node (to save 8 bytes per
  *  Node), whereas the version in the textbook uses a non-static nested
  *  class (for simplicity).
- *  
- *  % more tobe.txt 
+ *
+ *  % more tobe.txt
  *  to be or not to - be - - that - - - is
  *
  *  % java Stack < tobe.txt
@@ -45,7 +45,7 @@ import java.util.NoSuchElementException;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  *
- *  @param <Item> the generic type of an item in this stack
+ *  @param <Item> the generic type each item in this stack
  */
 public class Stack<Item> implements Iterable<Item> {
     private Node<Item> first;     // top of stack
@@ -135,7 +135,7 @@ public class Stack<Item> implements Iterable<Item> {
         }
         return s.toString();
     }
-       
+
 
     /**
      * Returns an iterator to this stack that iterates through the items in LIFO order.
@@ -143,29 +143,27 @@ public class Stack<Item> implements Iterable<Item> {
      * @return an iterator to this stack that iterates through the items in LIFO order
      */
     public Iterator<Item> iterator() {
-        return new ListIterator<Item>(first);
+        return new LinkedIterator(first);
     }
 
-    // an iterator, doesn't implement remove() since it's optional
-    private class ListIterator<Item> implements Iterator<Item> {
+    // the iterator
+    private class LinkedIterator implements Iterator<Item> {
         private Node<Item> current;
 
-        public ListIterator(Node<Item> first) {
+        public LinkedIterator(Node<Item> first) {
             current = first;
         }
 
+        // is there a next item?
         public boolean hasNext() {
             return current != null;
         }
 
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
+        // returns the next item
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
             Item item = current.item;
-            current = current.next; 
+            current = current.next;
             return item;
         }
     }
@@ -191,7 +189,7 @@ public class Stack<Item> implements Iterable<Item> {
 
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

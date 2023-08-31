@@ -20,7 +20,7 @@ package edu.princeton.cs.algs4;
  *  methods for returning the number of vertices <em>V</em> and the number
  *  of edges <em>E</em>. Parallel edges and self-loops are permitted.
  *  <p>
- *  This implementation uses an adjacency-lists representation, which 
+ *  This implementation uses an adjacency-lists representation, which
  *  is a vertex-indexed array of {@link Bag} objects.
  *  All operations take constant time (in the worst case) except
  *  iterating over the edges incident to a given vertex, which takes
@@ -39,14 +39,14 @@ public class FlowNetwork {
     private final int V;
     private int E;
     private Bag<FlowEdge>[] adj;
-    
+
     /**
      * Initializes an empty flow network with {@code V} vertices and 0 edges.
      * @param V the number of vertices
      * @throws IllegalArgumentException if {@code V < 0}
      */
     public FlowNetwork(int V) {
-        if (V < 0) throw new IllegalArgumentException("Number of vertices in a Graph must be nonnegative");
+        if (V < 0) throw new IllegalArgumentException("Number of vertices in a Graph must be non-negative");
         this.V = V;
         this.E = 0;
         adj = (Bag<FlowEdge>[]) new Bag[V];
@@ -64,16 +64,16 @@ public class FlowNetwork {
      */
     public FlowNetwork(int V, int E) {
         this(V);
-        if (E < 0) throw new IllegalArgumentException("Number of edges must be nonnegative");
+        if (E < 0) throw new IllegalArgumentException("Number of edges must be non-negative");
         for (int i = 0; i < E; i++) {
-            int v = StdRandom.uniform(V);
-            int w = StdRandom.uniform(V);
-            double capacity = StdRandom.uniform(100);
+            int v = StdRandom.uniformInt(V);
+            int w = StdRandom.uniformInt(V);
+            double capacity = StdRandom.uniformInt(100);
             addEdge(new FlowEdge(v, w, capacity));
         }
     }
 
-    /**  
+    /**
      * Initializes a flow network from an input stream.
      * The format is the number of vertices <em>V</em>,
      * followed by the number of edges <em>E</em>,
@@ -86,7 +86,7 @@ public class FlowNetwork {
     public FlowNetwork(In in) {
         this(in.readInt());
         int E = in.readInt();
-        if (E < 0) throw new IllegalArgumentException("number of edges must be nonnegative");
+        if (E < 0) throw new IllegalArgumentException("number of edges must be non-negative");
         for (int i = 0; i < E; i++) {
             int v = in.readInt();
             int w = in.readInt();
@@ -163,7 +163,7 @@ public class FlowNetwork {
     /**
      * Returns a string representation of the flow network.
      * This method takes time proportional to <em>E</em> + <em>V</em>.
-     * @return the number of vertices <em>V</em>, followed by the number of edges <em>E</em>,  
+     * @return the number of vertices <em>V</em>, followed by the number of edges <em>E</em>,
      *    followed by the <em>V</em> adjacency lists
      */
     public String toString() {
@@ -193,7 +193,7 @@ public class FlowNetwork {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

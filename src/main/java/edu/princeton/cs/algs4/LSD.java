@@ -1,14 +1,14 @@
 /******************************************************************************
  *  Compilation:  javac LSD.java
  *  Execution:    java LSD < input.txt
- *  Dependencies: StdIn.java StdOut.java 
+ *  Dependencies: StdIn.java StdOut.java
  *  Data files:   https://algs4.cs.princeton.edu/51radix/words3.txt
  *
  *  LSD radix sort
  *
  *    - Sort a String[] array of n extended ASCII strings (R = 256), each of length w.
  *
- *    - Sort an int[] array of n 32-bit integers, treating each integer as 
+ *    - Sort an int[] array of n 32-bit integers, treating each integer as
  *      a sequence of w = 4 bytes (R = 256).
  *
  *  Uses extra space proportional to n + R.
@@ -46,8 +46,8 @@ public class LSD {
     // do not instantiate
     private LSD() { }
 
-   /**  
-     * Rearranges the array of W-character strings in ascending order.
+   /**
+     * Rearranges the array of w-character strings in ascending order.
      *
      * @param a the array to be sorted
      * @param w the number of characters per string
@@ -81,24 +81,24 @@ public class LSD {
 
    /**
      * Rearranges the array of 32-bit integers in ascending order.
-     * This is about 2-3x faster than Arrays.sort().
+     * This is about 2-5x faster than Arrays.sort().
      *
      * @param a the array to be sorted
      */
     public static void sort(int[] a) {
-        final int BITS = 32;                 // each int is 32 bits 
-        final int R = 1 << BITS_PER_BYTE;    // each bytes is between 0 and 255
+        final int BITS = 32;                 // each int is 32 bits
+        final int R = 1 << BITS_PER_BYTE;    // each byte is between 0 and 255
         final int MASK = R - 1;              // 0xFF
         final int w = BITS / BITS_PER_BYTE;  // each int is 4 bytes
 
         int n = a.length;
         int[] aux = new int[n];
 
-        for (int d = 0; d < w; d++) {         
+        for (int d = 0; d < w; d++) {
 
             // compute frequency counts
             int[] count = new int[R+1];
-            for (int i = 0; i < n; i++) {           
+            for (int i = 0; i < n; i++) {
                 int c = (a[i] >> BITS_PER_BYTE*d) & MASK;
                 count[c + 1]++;
             }
@@ -123,11 +123,15 @@ public class LSD {
                 aux[count[c]++] = a[i];
             }
 
-            // copy back
-            for (int i = 0; i < n; i++)
-                a[i] = aux[i];
+            // optimization: swap a[] and aux[] references instead of copying
+            // (since w is even, the argument a[] to sort() will be the array
+            // with the sorted integers)
+            int[] temp = a;
+            a = aux;
+            aux = temp;
         }
     }
+
 
     /**
      * Reads in a sequence of fixed-length strings from standard input;
@@ -155,7 +159,7 @@ public class LSD {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

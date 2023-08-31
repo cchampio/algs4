@@ -5,7 +5,7 @@
  *
  *  An edge-weighted digraph, implemented using an adjacency matrix.
  *  Parallel edges are disallowed; self-loops are allowed.
- *  
+ *
  ******************************************************************************/
 
 package edu.princeton.cs.algs4;
@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *  The {@code AdjMatrixEdgeWeightedDigraph} class represents a edge-weighted
+ *  The {@code AdjMatrixEdgeWeightedDigraph} class represents an edge-weighted
  *  digraph of vertices named 0 through <em>V</em> - 1, where each
  *  directed edge is of type {@link DirectedEdge} and has a real-valued weight.
  *  It supports the following two primary operations: add a directed edge
@@ -41,14 +41,14 @@ public class AdjMatrixEdgeWeightedDigraph {
     private final int V;
     private int E;
     private DirectedEdge[][] adj;
-    
+
     /**
      * Initializes an empty edge-weighted digraph with {@code V} vertices and 0 edges.
      * @param V the number of vertices
      * @throws IllegalArgumentException if {@code V < 0}
      */
     public AdjMatrixEdgeWeightedDigraph(int V) {
-        if (V < 0) throw new IllegalArgumentException("number of vertices must be nonnegative");
+        if (V < 0) throw new IllegalArgumentException("number of vertices must be non-negative");
         this.V = V;
         this.E = 0;
         this.adj = new DirectedEdge[V][V];
@@ -63,14 +63,14 @@ public class AdjMatrixEdgeWeightedDigraph {
      */
     public AdjMatrixEdgeWeightedDigraph(int V, int E) {
         this(V);
-        if (E < 0) throw new IllegalArgumentException("number of edges must be nonnegative");
+        if (E < 0) throw new IllegalArgumentException("number of edges must be non-negative");
         if (E > V*V) throw new IllegalArgumentException("too many edges");
 
         // can be inefficient
         while (this.E != E) {
-            int v = StdRandom.uniform(V);
-            int w = StdRandom.uniform(V);
-            double weight = Math.round(100 * StdRandom.uniform()) / 100.0;
+            int v = StdRandom.uniformInt(V);
+            int w = StdRandom.uniformInt(V);
+            double weight = 0.01 * StdRandom.uniformInt(0, 100);
             addEdge(new DirectedEdge(v, w, weight));
         }
     }
@@ -192,7 +192,7 @@ public class AdjMatrixEdgeWeightedDigraph {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

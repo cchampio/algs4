@@ -29,6 +29,9 @@ package edu.princeton.cs.algs4;
  *  It includes methods for addition, subtraction, multiplication, composition,
  *  differentiation, and evaluation.
  *  <p>
+ *  This computes correct results if all arithmetic performed is
+ *  without overflow.
+ *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/99scientific">Section 9.9</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
@@ -140,10 +143,10 @@ public class Polynomial {
     }
 
 
-    /**       
+    /**
      * Compares this polynomial to the specified polynomial.
-     *       
-     * @param  other the other polynoimal
+     *
+     * @param  other the other polynomial
      * @return {@code true} if this polynomial equals {@code other};
      *         {@code false} otherwise
      */
@@ -192,7 +195,7 @@ public class Polynomial {
      * @param  that the other point
      * @return the value {@code 0} if this polynomial is equal to the argument
      *         polynomial (precisely when {@code equals()} returns {@code true});
-     *         a negative integer if this polynomialt is less than the argument
+     *         a negative integer if this polynomial is less than the argument
      *         polynomial; and a positive integer if this polynomial is greater than the
      *         argument point
      */
@@ -219,7 +222,7 @@ public class Polynomial {
         String s = coef[degree] + "x^" + degree;
         for (int i = degree - 1; i >= 0; i--) {
             if      (coef[i] == 0) continue;
-            else if (coef[i]  > 0) s = s + " + " + ( coef[i]);
+            else if (coef[i]  > 0) s = s + " + " + (coef[i]);
             else if (coef[i]  < 0) s = s + " - " + (-coef[i]);
             if      (i == 1) s = s + "x";
             else if (i >  1) s = s + "x^" + i;
@@ -232,7 +235,7 @@ public class Polynomial {
      *
      * @param args the command-line arguments (none)
      */
-    public static void main(String[] args) { 
+    public static void main(String[] args) {
         Polynomial zero = new Polynomial(0, 0);
 
         Polynomial p1   = new Polynomial(4, 3);
@@ -262,12 +265,11 @@ public class Polynomial {
         StdOut.println("p(3)        = " + p.evaluate(3));
         StdOut.println("p'(x)       = " + p.differentiate());
         StdOut.println("p''(x)      = " + p.differentiate().differentiate());
-   }
-
+    }
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

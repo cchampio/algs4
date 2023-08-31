@@ -23,27 +23,28 @@ package edu.princeton.cs.algs4;
  *  A <em>vertex cover</em> in a graph is a subset of its vertices such that
  *  every edge is incident to at least one vertex. A <em>minimum vertex cover</em>
  *  is a vertex cover with the minimum number of vertices.
- *  By Konig's theorem, in any biparite
+ *  By Konig's theorem, in any bipartite
  *  graph, the maximum number of edges in matching equals the minimum number
  *  of vertices in a vertex cover.
  *  The maximum matching problem in <em>nonbipartite</em> graphs is
  *  also important, but all known algorithms for this more general problem
  *  are substantially more complicated.
  *  <p>
- *  This implementation uses the <em>alternating path algorithm</em>.
- *  It is equivalent to reducing to the maximum flow problem and running
- *  the augmenting path algorithm on the resulting flow network, but it
+ *  This implementation uses the <em>alternating-path algorithm</em>.
+ *  It is equivalent to reducing to the maximum-flow problem and running
+ *  the augmenting-path algorithm on the resulting flow network, but it
  *  does so with less overhead.
- *  The order of growth of the running time in the worst case is
- *  (<em>E</em> + <em>V</em>) <em>V</em>,
- *  where <em>E</em> is the number of edges and <em>V</em> is the number
- *  of vertices in the graph. It uses extra space (not including the graph)
- *  proportional to <em>V</em>.
+ *  The constructor takes <em>O</em>((<em>E</em> + <em>V</em>) <em>V</em>)
+ *  time, where <em>E</em> is the number of edges and <em>V</em> is the
+ *  number of vertices in the graph.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the graph).
  *  <p>
- *  See also {@link HopcroftKarp}, which solves the problem in  O(<em>E</em> sqrt(<em>V</em>))
- *  using the Hopcroft-Karp algorithm and
+ *  See also {@link HopcroftKarp}, which solves the problem in
+ *  <em>O</em>(<em>E</em> sqrt(<em>V</em>)) using the Hopcroft-Karp
+ *  algorithm and
  *  <a href = "https://algs4.cs.princeton.edu/65reductions/BipartiteMatchingToMaxflow.java.html">BipartiteMatchingToMaxflow</a>,
- *  which solves the problem in O(<em>E V</em>) time via a reduction to maxflow.
+ *  which solves the problem in <em>O</em>((<em>E</em> + <em>V</em>) <em>V</em>)
+ *  time via a reduction to maxflow.
  *  <p>
  *  For additional documentation, see
  *  <a href="https://algs4.cs.princeton.edu/65reductions">Section 6.5</a>
@@ -62,7 +63,7 @@ public class BipartiteMatching {
                                          //         = -1 if v is not in current matching
     private boolean[] inMinVertexCover;  // inMinVertexCover[v] = true iff v is in min vertex cover
     private boolean[] marked;            // marked[v] = true iff v is reachable via alternating path
-    private int[] edgeTo;                // edgeTo[v] = w if v-w is last edge on path to w
+    private int[] edgeTo;                // edgeTo[v] = last edge on alternating path to v
 
     /**
      * Determines a maximum matching (and a minimum vertex cover)
@@ -317,7 +318,7 @@ public class BipartiteMatching {
         if (G.V() < 1000) StdOut.println(G);
 
         BipartiteMatching matching = new BipartiteMatching(G);
-        
+
         // print maximum matching
         StdOut.printf("Number of edges in max matching        = %d\n", matching.size());
         StdOut.printf("Number of vertices in min vertex cover = %d\n", matching.size());
@@ -345,7 +346,7 @@ public class BipartiteMatching {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

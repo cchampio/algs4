@@ -4,19 +4,19 @@
  *  Dependencies: StdOut.java StdIn.java
  *  Data files:   https://algs4.cs.princeton.edu/22mergesort/tiny.txt
  *                https://algs4.cs.princeton.edu/22mergesort/words3.txt
- *   
+ *
  *  Sorts a sequence of strings from standard input using
  *  bottom-up mergesort.
- *   
+ *
  *  % more tiny.txt
  *  S O R T E X A M P L E
  *
  *  % java MergeBU < tiny.txt
  *  A E E L M O P R S T X                 [ one string per line ]
- *    
+ *
  *  % more words3.txt
  *  bed bug dad yes zoo ... all bad yet
- *  
+ *
  *  % java MergeBU < words3.txt
  *  all bad bed bug dad ... yes yet zoo    [ one string per line ]
  *
@@ -26,9 +26,19 @@ package edu.princeton.cs.algs4;
 
 /**
  *  The {@code MergeBU} class provides static methods for sorting an
- *  array using bottom-up mergesort.
+ *  array using <em>bottom-up mergesort</em>. It is non-recursive.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a> of
+ *  This implementation takes &Theta;(<em>n</em> log <em>n</em>) time
+ *  to sort any array of length <em>n</em> (assuming comparisons
+ *  take constant time). It makes between
+ *  ~ &frac12; <em>n</em> log<sub>2</sub> <em>n</em> and
+ *  ~ 1 <em>n</em> log<sub>2</sub> <em>n</em> compares.
+ *  <p>
+ *  This sorting algorithm is stable.
+ *  It uses &Theta;(<em>n</em>) extra memory (not including the input array).
+ *  <p>
+ *  For additional documentation, see
+ *  <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
@@ -44,13 +54,13 @@ public class MergeBU {
 
         // copy to aux[]
         for (int k = lo; k <= hi; k++) {
-            aux[k] = a[k]; 
+            aux[k] = a[k];
         }
 
         // merge back to a[]
         int i = lo, j = mid+1;
         for (int k = lo; k <= hi; k++) {
-            if      (i > mid)              a[k] = aux[j++];  // this copying is unneccessary
+            if      (i > mid)              a[k] = aux[j++];  // this copying is unnecessary
             else if (j > hi)               a[k] = aux[i++];
             else if (less(aux[j], aux[i])) a[k] = aux[j++];
             else                           a[k] = aux[i++];
@@ -78,7 +88,7 @@ public class MergeBU {
   /***********************************************************************
     *  Helper sorting functions.
     ***************************************************************************/
-    
+
     // is v < w ?
     private static boolean less(Comparable v, Comparable w) {
         return v.compareTo(w) < 0;
@@ -103,7 +113,7 @@ public class MergeBU {
 
     /**
      * Reads in a sequence of strings from standard input; bottom-up
-     * mergesorts them; and prints them to standard output in ascending order. 
+     * mergesorts them; and prints them to standard output in ascending order.
      *
      * @param args the command-line arguments
      */
@@ -115,7 +125,7 @@ public class MergeBU {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

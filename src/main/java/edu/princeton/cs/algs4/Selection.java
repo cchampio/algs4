@@ -4,18 +4,18 @@
  *  Dependencies: StdOut.java StdIn.java
  *  Data files:   https://algs4.cs.princeton.edu/21elementary/tiny.txt
  *                https://algs4.cs.princeton.edu/21elementary/words3.txt
- *   
+ *
  *  Sorts a sequence of strings from standard input using selection sort.
- *   
+ *
  *  % more tiny.txt
  *  S O R T E X A M P L E
  *
  *  % java Selection < tiny.txt
  *  A E E L M O P R S T X                 [ one string per line ]
- *    
+ *
  *  % more words3.txt
  *  bed bug dad yes zoo ... all bad yet
- *  
+ *
  *  % java Selection < words3.txt
  *  all bad bed bug dad ... yes yet zoo    [ one string per line ]
  *
@@ -27,10 +27,17 @@ import java.util.Comparator;
 
 /**
  *  The {@code Selection} class provides static methods for sorting an
- *  array using selection sort.
+ *  array using <em>selection sort</em>.
+ *  This implementation makes ~ &frac12; <em>n</em><sup>2</sup> compares to sort
+ *  any array of length <em>n</em>, so it is not suitable for sorting large arrays.
+ *  It performs exactly <em>n</em> exchanges.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a> of
- *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
+ *  This sorting algorithm is not stable. It uses &Theta;(1) extra memory
+ *  (not including the input array).
+ *  <p>
+ *  For additional documentation, see
+ *  <a href="https://algs4.cs.princeton.edu/21elementary">Section 2.1</a>
+ *  of <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
@@ -79,7 +86,7 @@ public class Selection {
    /***************************************************************************
     *  Helper sorting functions.
     ***************************************************************************/
-    
+
     // is v < w ?
     private static boolean less(Comparable v, Comparable w) {
         return v.compareTo(w) < 0;
@@ -89,8 +96,8 @@ public class Selection {
     private static boolean less(Comparator comparator, Object v, Object w) {
         return comparator.compare(v, w) < 0;
     }
-        
-        
+
+
     // exchange a[i] and a[j]
     private static void exch(Object[] a, int i, int j) {
         Object swap = a[i];
@@ -107,7 +114,7 @@ public class Selection {
     private static boolean isSorted(Comparable[] a) {
         return isSorted(a, 0, a.length - 1);
     }
-        
+
     // is the array sorted from a[lo] to a[hi]
     private static boolean isSorted(Comparable[] a, int lo, int hi) {
         for (int i = lo + 1; i <= hi; i++)
@@ -137,8 +144,8 @@ public class Selection {
     }
 
     /**
-     * Reads in a sequence of strings from standard input; selection sorts them; 
-     * and prints them to standard output in ascending order. 
+     * Reads in a sequence of strings from standard input; selection sorts them;
+     * and prints them to standard output in ascending order.
      *
      * @param args the command-line arguments
      */
@@ -150,7 +157,7 @@ public class Selection {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

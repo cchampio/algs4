@@ -2,11 +2,11 @@
  *  Compilation:  javac ResizingArrayQueue.java
  *  Execution:    java ResizingArrayQueue < input.txt
  *  Dependencies: StdIn.java StdOut.java
- *  Data files:   https://algs4.cs.princeton.edu/13stacks/tobe.txt  
- *  
+ *  Data files:   https://algs4.cs.princeton.edu/13stacks/tobe.txt
+ *
  *  Queue implementation with a resizing array.
  *
- *  % java ResizingArrayQueue < tobe.txt 
+ *  % java ResizingArrayQueue < tobe.txt
  *  to be or not to be (2 left on queue)
  *
  ******************************************************************************/
@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
  *  when it is full and halves the underlying array when it is one-quarter full.
  *  The <em>enqueue</em> and <em>dequeue</em> operations take constant amortized time.
  *  The <em>size</em>, <em>peek</em>, and <em>is-empty</em> operations takes
- *  constant time in the worst case. 
+ *  constant time in the worst case.
  *  <p>
  *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/13stacks">Section 1.3</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
@@ -37,6 +37,9 @@ import java.util.NoSuchElementException;
  *  @author Kevin Wayne
  */
 public class ResizingArrayQueue<Item> implements Iterable<Item> {
+    // initial capacity of underlying resizing array
+    private static final int INIT_CAPACITY = 8;
+
     private Item[] q;       // queue elements
     private int n;          // number of elements on queue
     private int first;      // index of first element of queue
@@ -47,7 +50,7 @@ public class ResizingArrayQueue<Item> implements Iterable<Item> {
      * Initializes an empty queue.
      */
     public ResizingArrayQueue() {
-        q = (Item[]) new Object[2];
+        q = (Item[]) new Object[INIT_CAPACITY];
         n = 0;
         first = 0;
         last = 0;
@@ -72,11 +75,11 @@ public class ResizingArrayQueue<Item> implements Iterable<Item> {
     // resize the underlying array
     private void resize(int capacity) {
         assert capacity >= n;
-        Item[] temp = (Item[]) new Object[capacity];
+        Item[] copy = (Item[]) new Object[capacity];
         for (int i = 0; i < n; i++) {
-            temp[i] = q[(first + i) % q.length];
+            copy[i] = q[(first + i) % q.length];
         }
-        q = temp;
+        q = copy;
         first = 0;
         last  = n;
     }
@@ -106,7 +109,7 @@ public class ResizingArrayQueue<Item> implements Iterable<Item> {
         first++;
         if (first == q.length) first = 0;           // wrap-around
         // shrink size of array if necessary
-        if (n > 0 && n == q.length/4) resize(q.length/2); 
+        if (n > 0 && n == q.length/4) resize(q.length/2);
         return item;
     }
 
@@ -129,11 +132,13 @@ public class ResizingArrayQueue<Item> implements Iterable<Item> {
         return new ArrayIterator();
     }
 
-    // an iterator, doesn't implement remove() since it's optional
+    // an array iterator, from first to last-1
     private class ArrayIterator implements Iterator<Item> {
         private int i = 0;
-        public boolean hasNext()  { return i < n;                               }
-        public void remove()      { throw new UnsupportedOperationException();  }
+
+        public boolean hasNext() {
+            return i < n;
+        }
 
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
@@ -161,7 +166,7 @@ public class ResizingArrayQueue<Item> implements Iterable<Item> {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

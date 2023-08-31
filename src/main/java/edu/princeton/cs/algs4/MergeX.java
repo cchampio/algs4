@@ -4,19 +4,19 @@
  *  Dependencies: StdOut.java StdIn.java
  *  Data files:   https://algs4.cs.princeton.edu/22mergesort/tiny.txt
  *                https://algs4.cs.princeton.edu/22mergesort/words3.txt
- *   
+ *
  *  Sorts a sequence of strings from standard input using an
  *  optimized version of mergesort.
- *   
+ *
  *  % more tiny.txt
  *  S O R T E X A M P L E
  *
  *  % java MergeX < tiny.txt
  *  A E E L M O P R S T X                 [ one string per line ]
- *    
+ *
  *  % more words3.txt
  *  bed bug dad yes zoo ... all bad yet
- *  
+ *
  *  % java MergeX < words3.txt
  *  all bad bed bug dad ... yes yet zoo    [ one string per line ]
  *
@@ -30,7 +30,15 @@ import java.util.Comparator;
  *  The {@code MergeX} class provides static methods for sorting an
  *  array using an optimized version of mergesort.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/22mergesort">Section 2.2</a> of
+ *  In the worst case, this implementation takes
+ *  &Theta;(<em>n</em> log <em>n</em>) time to sort an array of
+ *  length <em>n</em> (assuming comparisons take constant time).
+ *  <p>
+ *  This sorting algorithm is stable.
+ *  It uses &Theta;(<em>n</em>) extra memory (not including the input array).
+ *  <p>
+ *  For additional documentation, see
+ *  <a href="https://algs4.cs.princeton.edu/22mergesort">Section 2.2</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
@@ -62,7 +70,7 @@ public class MergeX {
 
     private static void sort(Comparable[] src, Comparable[] dst, int lo, int hi) {
         // if (hi <= lo) return;
-        if (hi <= lo + CUTOFF) { 
+        if (hi <= lo + CUTOFF) {
             insertionSort(dst, lo, hi);
             return;
         }
@@ -90,7 +98,7 @@ public class MergeX {
      */
     public static void sort(Comparable[] a) {
         Comparable[] aux = a.clone();
-        sort(aux, a, 0, a.length-1);  
+        sort(aux, a, 0, a.length-1);
         assert isSorted(a);
     }
 
@@ -161,7 +169,7 @@ public class MergeX {
 
     private static void sort(Object[] src, Object[] dst, int lo, int hi, Comparator comparator) {
         // if (hi <= lo) return;
-        if (hi <= lo + CUTOFF) { 
+        if (hi <= lo + CUTOFF) {
             insertionSort(dst, lo, hi, comparator);
             return;
         }
@@ -218,8 +226,8 @@ public class MergeX {
 
     /**
      * Reads in a sequence of strings from standard input; mergesorts them
-     * (using an optimized version of mergesort); 
-     * and prints them to standard output in ascending order. 
+     * (using an optimized version of mergesort);
+     * and prints them to standard output in ascending order.
      *
      * @param args the command-line arguments
      */
@@ -231,7 +239,7 @@ public class MergeX {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

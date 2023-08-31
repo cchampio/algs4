@@ -7,14 +7,14 @@
  *  Computes shortest paths in an edge-weighted acyclic digraph.
  *
  *  % java AcyclicSP tinyEWDAG.txt 5
- *  5 to 0 (0.73)  5->4  0.35   4->0  0.38   
- *  5 to 1 (0.32)  5->1  0.32   
- *  5 to 2 (0.62)  5->7  0.28   7->2  0.34   
- *  5 to 3 (0.61)  5->1  0.32   1->3  0.29   
- *  5 to 4 (0.35)  5->4  0.35   
- *  5 to 5 (0.00)  
- *  5 to 6 (1.13)  5->1  0.32   1->3  0.29   3->6  0.52   
- *  5 to 7 (0.28)  5->7  0.28   
+ *  5 to 0 (0.73)  5->4  0.35   4->0  0.38
+ *  5 to 1 (0.32)  5->1  0.32
+ *  5 to 2 (0.62)  5->7  0.28   7->2  0.34
+ *  5 to 3 (0.61)  5->1  0.32   1->3  0.29
+ *  5 to 4 (0.35)  5->4  0.35
+ *  5 to 5 (0.00)
+ *  5 to 6 (1.13)  5->1  0.32   1->3  0.29   3->6  0.52
+ *  5 to 7 (0.28)  5->7  0.28
  *
  ******************************************************************************/
 
@@ -26,15 +26,24 @@ package edu.princeton.cs.algs4;
  *  graphs (DAGs). The edge weights can be positive, negative, or zero.
  *  <p>
  *  This implementation uses a topological-sort based algorithm.
- *  The constructor takes time proportional to <em>V</em> + <em>E</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Each call to {@code distTo(int)} and {@code hasPathTo(int)} takes constant time;
- *  each call to {@code pathTo(int)} takes time proportional to the number of
- *  edges in the shortest path returned.
+ *  The constructor takes &Theta;(<em>V</em> + <em>E</em>) time in the
+ *  worst case, where <em>V</em> is the number of vertices and
+ *  <em>E</em> is the number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the
+ *  edge-weighted digraph).
  *  <p>
- *  For additional documentation,    
- *  see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of    
- *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne. 
+ *  This correctly computes shortest paths if all arithmetic performed is
+ *  without floating-point rounding error or arithmetic overflow.
+ *  This is the case if all edge weights are integers and if none of the
+ *  intermediate results exceeds 2<sup>52</sup>. Since all intermediate
+ *  results are sums of edge weights, they are bounded by <em>V C</em>,
+ *  where <em>V</em> is the number of vertices and <em>C</em> is the maximum
+ *  absolute value of any edge weight.
+ *  <p>
+ *  For additional documentation,
+ *  see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of
+ *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
@@ -78,7 +87,7 @@ public class AcyclicSP {
         if (distTo[w] > distTo[v] + e.weight()) {
             distTo[w] = distTo[v] + e.weight();
             edgeTo[w] = e;
-        }       
+        }
     }
 
     /**
@@ -157,7 +166,7 @@ public class AcyclicSP {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

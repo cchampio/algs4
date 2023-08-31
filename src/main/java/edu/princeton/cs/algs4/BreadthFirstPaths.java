@@ -12,12 +12,12 @@
  *
  *  %  java Graph tinyCG.txt
  *  6 8
- *  0: 2 1 5 
- *  1: 0 2 
- *  2: 0 1 3 4 
- *  3: 5 4 2 
- *  4: 3 2 
- *  5: 3 0 
+ *  0: 2 1 5
+ *  1: 0 2
+ *  2: 0 1 3 4
+ *  3: 5 4 2
+ *  4: 3 2
+ *  5: 3 0
  *
  *  %  java BreadthFirstPaths tinyCG.txt 0
  *  0 to 0 (0):  0
@@ -48,15 +48,14 @@ package edu.princeton.cs.algs4;
  *  to every other vertex in an undirected graph.
  *  <p>
  *  This implementation uses breadth-first search.
- *  The constructor takes time proportional to <em>V</em> + <em>E</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Each call to {@link #distTo(int)} and {@link #hasPathTo(int)} takes constant time;
- *  each call to {@link #pathTo(int)} takes time proportional to the length
- *  of the path.
- *  It uses extra space (not including the graph) proportional to <em>V</em>.
+ *  The constructor takes &Theta;(<em>V</em> + <em>E</em>) time in the
+ *  worst case, where <em>V</em> is the number of vertices and <em>E</em>
+ *  is the number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>V</em>) extra space (not including the graph).
  *  <p>
  *  For additional documentation,
- *  see <a href="https://algs4.cs.princeton.edu/41graph">Section 4.1</a>   
+ *  see <a href="https://algs4.cs.princeton.edu/41graph">Section 4.1</a>
  *  of <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
@@ -90,6 +89,8 @@ public class BreadthFirstPaths {
      * and every other vertex in graph {@code G}.
      * @param G the graph
      * @param sources the source vertices
+     * @throws IllegalArgumentException if {@code sources} is {@code null}
+     * @throws IllegalArgumentException if {@code sources} contains no vertices
      * @throws IllegalArgumentException unless {@code 0 <= s < V} for each vertex
      *         {@code s} in {@code sources}
      */
@@ -162,7 +163,8 @@ public class BreadthFirstPaths {
      * Returns the number of edges in a shortest path between the source vertex {@code s}
      * (or sources) and vertex {@code v}?
      * @param v the vertex
-     * @return the number of edges in a shortest path
+     * @return the number of edges in such a shortest path
+     *         (or {@code Integer.MAX_VALUE} if there is no such path)
      * @throws IllegalArgumentException unless {@code 0 <= v < V}
      */
     public int distTo(int v) {
@@ -240,16 +242,22 @@ public class BreadthFirstPaths {
             throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
     }
 
-    // throw an IllegalArgumentException unless {@code 0 <= v < V}
+    // throw an IllegalArgumentException if vertices is null, has zero vertices,
+    // or has a vertex not between 0 and V-1
     private void validateVertices(Iterable<Integer> vertices) {
         if (vertices == null) {
             throw new IllegalArgumentException("argument is null");
         }
-        int V = marked.length;
-        for (int v : vertices) {
-            if (v < 0 || v >= V) {
-                throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
+        int vertexCount = 0;
+        for (Integer v : vertices) {
+            vertexCount++;
+            if (v == null) {
+                throw new IllegalArgumentException("vertex is null");
             }
+            validateVertex(v);
+        }
+        if (vertexCount == 0) {
+            throw new IllegalArgumentException("zero vertices");
         }
     }
 
@@ -287,7 +295,7 @@ public class BreadthFirstPaths {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

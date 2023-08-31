@@ -7,10 +7,10 @@
  *                https://algs4.cs.princeton.edu/43mst/mediumEWG.txt
  *                https://algs4.cs.princeton.edu/43mst/largeEWG.txt
  *
- *  Compute a minimum spanning forest using a lazy version of Prim's 
+ *  Compute a minimum spanning forest using a lazy version of Prim's
  *  algorithm.
  *
- *  %  java LazyPrimMST tinyEWG.txt 
+ *  %  java LazyPrimMST tinyEWG.txt
  *  0-7 0.16000
  *  1-7 0.19000
  *  0-2 0.26000
@@ -47,17 +47,18 @@ package edu.princeton.cs.algs4;
  *  The edge weights can be positive, zero, or negative and need not
  *  be distinct. If the graph is not connected, it computes a <em>minimum
  *  spanning forest</em>, which is the union of minimum spanning trees
- *  in each connected component. The {@code weight()} method returns the 
+ *  in each connected component. The {@code weight()} method returns the
  *  weight of a minimum spanning tree and the {@code edges()} method
  *  returns its edges.
  *  <p>
  *  This implementation uses a lazy version of <em>Prim's algorithm</em>
  *  with a binary heap of edges.
- *  The constructor takes time proportional to <em>E</em> log <em>E</em>
- *  and extra space (not including the graph) proportional to <em>E</em>,
- *  where <em>V</em> is the number of vertices and <em>E</em> is the number of edges.
- *  Afterwards, the {@code weight()} method takes constant time
- *  and the {@code edges()} method takes time proportional to <em>V</em>.
+ *  The constructor takes &Theta;(<em>E</em> log <em>E</em>) time in
+ *  the worst case, where <em>V</em> is the number of vertices and
+ *  <em>E</em> is the number of edges.
+ *  Each instance method takes &Theta;(1) time.
+ *  It uses &Theta;(<em>E</em>) extra space in the worst case
+ *  (not including the edge-weighted graph).
  *  <p>
  *  For additional documentation,
  *  see <a href="https://algs4.cs.princeton.edu/43mst">Section 4.3</a> of
@@ -69,11 +70,11 @@ package edu.princeton.cs.algs4;
  *  @author Kevin Wayne
  */
 public class LazyPrimMST {
-    private static final double FLOATING_POINT_EPSILON = 1E-12;
+    private static final double FLOATING_POINT_EPSILON = 1.0E-12;
 
     private double weight;       // total weight of MST
     private Queue<Edge> mst;     // edges in the MST
-    private boolean[] marked;    // marked[v] = true if v on tree
+    private boolean[] marked;    // marked[v] = true iff v on tree
     private MinPQ<Edge> pq;      // edges with one endpoint in tree
 
     /**
@@ -113,7 +114,7 @@ public class LazyPrimMST {
         for (Edge e : G.adj(v))
             if (!marked[e.other(v)]) pq.insert(e);
     }
-        
+
     /**
      * Returns the edges in a minimum spanning tree (or forest).
      * @return the edges in a minimum spanning tree (or forest) as
@@ -148,7 +149,7 @@ public class LazyPrimMST {
         UF uf = new UF(G.V());
         for (Edge e : edges()) {
             int v = e.either(), w = e.other(v);
-            if (uf.connected(v, w)) {
+            if (uf.find(v) == uf.find(w)) {
                 System.err.println("Not a forest");
                 return false;
             }
@@ -158,7 +159,7 @@ public class LazyPrimMST {
         // check that it is a spanning forest
         for (Edge e : G.edges()) {
             int v = e.either(), w = e.other(v);
-            if (!uf.connected(v, w)) {
+            if (uf.find(v) != uf.find(w)) {
                 System.err.println("Not a spanning forest");
                 return false;
             }
@@ -177,7 +178,7 @@ public class LazyPrimMST {
             // check that e is min weight edge in crossing cut
             for (Edge f : G.edges()) {
                 int x = f.either(), y = f.other(x);
-                if (!uf.connected(x, y)) {
+                if (uf.find(x) != uf.find(y)) {
                     if (f.weight() < e.weight()) {
                         System.err.println("Edge " + f + " violates cut optimality conditions");
                         return false;
@@ -189,8 +190,8 @@ public class LazyPrimMST {
 
         return true;
     }
-    
-    
+
+
     /**
      * Unit tests the {@code LazyPrimMST} data type.
      *
@@ -209,7 +210,7 @@ public class LazyPrimMST {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

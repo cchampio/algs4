@@ -2,7 +2,7 @@
  *  Compilation:  javac SET.java
  *  Execution:    java SET
  *  Dependencies: StdOut.java
- *  
+ *
  *  Set implementation using Java's TreeSet library.
  *  Does not allow duplicates.
  *
@@ -46,7 +46,7 @@ import java.util.TreeSet;
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  *
- *  @param <Key> the generic type of a key in this set
+ *  @param <Key> the generic type of each key in this set
  */
 
 public class SET<Key extends Comparable<Key>> implements Iterable<Key> {
@@ -95,12 +95,25 @@ public class SET<Key extends Comparable<Key>> implements Iterable<Key> {
 
     /**
      * Removes the specified key from this set (if the set contains the specified key).
+     * This is equivalent to {@code remove()}, but we plan to deprecate {@code delete()}.
      *
      * @param  key the key
      * @throws IllegalArgumentException if {@code key} is {@code null}
      */
     public void delete(Key key) {
         if (key == null) throw new IllegalArgumentException("called delete() with a null key");
+        set.remove(key);
+    }
+
+    /**
+     * Removes the specified key from this set (if the set contains the specified key).
+     * This is equivalent to {@code delete()}, but we plan to deprecate {@code delete()}.
+     *
+     * @param  key the key
+     * @throws IllegalArgumentException if {@code key} is {@code null}
+     */
+    public void remove(Key key) {
+        if (key == null) throw new IllegalArgumentException("called remove() with a null key");
         set.remove(key);
     }
 
@@ -122,7 +135,7 @@ public class SET<Key extends Comparable<Key>> implements Iterable<Key> {
     public boolean isEmpty() {
         return size() == 0;
     }
- 
+
     /**
      * Returns all of the keys in this set, as an iterator.
      * To iterate over all of the keys in a set named {@code set}, use the
@@ -229,14 +242,14 @@ public class SET<Key extends Comparable<Key>> implements Iterable<Key> {
         return c;
     }
 
-    /**       
+    /**
      * Compares this set to the specified set.
      * <p>
      * Note that this method declares two empty sets to be equal
      * even if they are parameterized by different generic types.
-     * This is consistent with the behavior of {@code equals()} 
+     * This is consistent with the behavior of {@code equals()}
      * within Java's Collections framework.
-     *       
+     *
      * @param  other the other set
      * @return {@code true} if this set equals {@code other};
      *         {@code false} otherwise
@@ -332,7 +345,7 @@ public class SET<Key extends Comparable<Key>> implements Iterable<Key> {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

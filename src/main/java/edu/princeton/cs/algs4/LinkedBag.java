@@ -5,7 +5,7 @@
  *
  *  A generic bag or multiset, implemented using a singly linked list.
  *
- *  % more tobe.txt 
+ *  % more tobe.txt
  *  to be or not to - be - - that - - - is
  *
  *  % java LinkedBag < tobe.txt
@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *  The {@code LinkedBag} class represents a bag (or multiset) of 
- *  generic items. It supports insertion and iterating over the 
+ *  The {@code LinkedBag} class represents a bag (or multiset) of
+ *  generic items. It supports insertion and iterating over the
  *  items in arbitrary order.
  *  <p>
  *  This implementation uses a singly linked list with a non-static nested class Node.
@@ -99,15 +99,15 @@ public class LinkedBag<Item> implements Iterable<Item> {
      * Returns an iterator that iterates over the items in the bag.
      */
     public Iterator<Item> iterator()  {
-        return new ListIterator();  
+        return new LinkedIterator();
     }
 
     // an iterator over a linked list
-    private class ListIterator implements Iterator<Item> {
+    private class LinkedIterator implements Iterator<Item> {
         private Node current;
 
         // creates a new iterator
-        public ListIterator() {
+        public LinkedIterator() {
             current = first;
         }
 
@@ -116,16 +116,11 @@ public class LinkedBag<Item> implements Iterable<Item> {
             return current != null;
         }
 
-        // this method is optional in Iterator interface
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-
         // returns the next item in the iterator (and advances the iterator)
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
             Item item = current.item;
-            current = current.next; 
+            current = current.next;
             return item;
         }
     }
@@ -152,7 +147,7 @@ public class LinkedBag<Item> implements Iterable<Item> {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

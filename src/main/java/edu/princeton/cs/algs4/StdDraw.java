@@ -5,13 +5,18 @@
  *
  *  Standard drawing library. This class provides a basic capability for
  *  creating drawings with your programs. It uses a simple graphics model that
- *  allows you to create drawings consisting of points, lines, and curves
- *  in a window on your computer and to save the drawings to a file.
+ *  allows you to create drawings consisting of geometric shapes (e.g.,
+ *  points, lines, circles, rectangles) in a window on your computer
+ *  and to save the drawings to a file.
  *
  *  Todo
  *  ----
+ *    -  Don't show window until first unbuffered drawing command or call to show()
+ *       (with setVisible not set to false).
  *    -  Add support for gradient fill, etc.
- *    -  Fix setCanvasSize() so that it can only be called once.
+ *    -  Fix setCanvasSize() so that it can be called only once.
+ *    -  Should setCanvasSize() reset xScale(), yScale(), penRadius(),
+ *       penColor(), and font()
  *    -  On some systems, drawing a line (or other shape) that extends way
  *       beyond canvas (e.g., to infinity) dimensions does not get drawn.
  *
@@ -26,9 +31,11 @@ package edu.princeton.cs.algs4;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FileDialog;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
@@ -50,8 +57,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DirectColorModel;
-import java.awt.image.WritableRaster;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,22 +78,25 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 /**
+ *  <p><b>Overview.</b>
  *  The {@code StdDraw} class provides a basic capability for
  *  creating drawings with your programs. It uses a simple graphics model that
- *  allows you to create drawings consisting of points, lines, squares, 
+ *  allows you to create drawings consisting of points, lines, squares,
  *  circles, and other geometric shapes in a window on your computer and
  *  to save the drawings to a file. Standard drawing also includes
  *  facilities for text, color, pictures, and animation, along with
  *  user interaction via the keyboard and mouse.
  *  <p>
  *  <b>Getting started.</b>
- *  To use standard drawing, you must have {@code StdDraw.class} in your
+ *  To use this class, you must have {@code StdDraw.class} in your
  *  Java classpath. If you used our autoinstaller, you should be all set.
- *  Otherwise, download
+ *  Otherwise, either download
+ *  <a href = "https://introcs.cs.princeton.edu/java/code/stdlib.jar">stdlib.jar</a>
+ *  and add to your Java classpath or download
  *  <a href = "https://introcs.cs.princeton.edu/java/stdlib/StdDraw.java">StdDraw.java</a>
  *  and put a copy in your working directory.
  *  <p>
- *  Now, type the following short program into your editor:
+ *  Now, cut-and-paste the following short program into your editor:
  *  <pre>
  *   public class TestStdDraw {
  *       public static void main(String[] args) {
@@ -125,7 +133,7 @@ import javax.swing.KeyStroke;
  *  <ul>
  *  <li> {@link #circle(double x, double y, double radius)}
  *  <li> {@link #ellipse(double x, double y, double semiMajorAxis, double semiMinorAxis)}
- *  <li> {@link #square(double x, double y, double radius)}
+ *  <li> {@link #square(double x, double y, double halfLength)}
  *  <li> {@link #rectangle(double x, double y, double halfWidth, double halfHeight)}
  *  </ul>
  *  <p>
@@ -206,9 +214,10 @@ import javax.swing.KeyStroke;
  *  The first method allows you to specify colors using the RGB color system.
  *  This <a href = "http://johndyer.name/lab/colorpicker/">color picker</a>
  *  is a convenient way to find a desired color.
+ *  <p>
  *  The second method allows you to specify colors using the
- *  {@link Color} data type that is discussed in Chapter 3. Until then,
- *  you can use this method with one of these predefined colors in standard drawing:
+ *  {@link Color} data type, which is defined in Java's {@link java.awt} package.
+ *  A number of colors are predefined in standard drawing:
  *  {@link #BLACK}, {@link #BLUE}, {@link #CYAN}, {@link #DARK_GRAY}, {@link #GRAY},
  *  {@link #GREEN}, {@link #LIGHT_GRAY}, {@link #MAGENTA}, {@link #ORANGE},
  *  {@link #PINK}, {@link #RED}, {@link #WHITE}, {@link #YELLOW},
@@ -216,6 +225,15 @@ import javax.swing.KeyStroke;
  *  {@link #PRINCETON_ORANGE}.
  *  For example, {@code StdDraw.setPenColor(StdDraw.MAGENTA)} sets the
  *  pen color to magenta.
+ *  <p>
+ *  <b>Window title.</b>
+ *  By default, the standard drawing window title is "Standard Draw".
+ *  You can change the title with the following method:
+ *  <ul>
+ *  <li> {@link #setTitle(String windowTitle)}
+ *  </ul>
+ *  <p>
+ *  This sets the standard drawing window title to the specified string.
  *  <p>
  *  <b>Canvas size.</b>
  *  By default, all drawing takes places in a 512-by-512 canvas.
@@ -228,7 +246,7 @@ import javax.swing.KeyStroke;
  *  This sets the canvas size to be <em>width</em>-by-<em>height</em> pixels.
  *  It also erases the current drawing and resets the coordinate system,
  *  pen radius, pen color, and font back to their default values.
- *  Ordinarly, this method is called once, at the very beginning of a program.
+ *  Ordinarily, this method is called only once, at the very beginning of a program.
  *  For example, {@code StdDraw.setCanvasSize(800, 800)}
  *  sets the canvas size to be 800-by-800 pixels.
  *  <p>
@@ -242,7 +260,7 @@ import javax.swing.KeyStroke;
  *  <li> {@link #setScale(double min, double max)}
  *  </ul>
  *  <p>
- *  The arguments are the coordinates of the minimum and maximum 
+ *  The arguments are the coordinates of the minimum and maximum
  *  <em>x</em>- or <em>y</em>-coordinates that will appear in the canvas.
  *  For example, if you  wish to use the default coordinate system but
  *  leave a small margin, you can call {@code StdDraw.setScale(-.05, 1.05)}.
@@ -251,7 +269,7 @@ import javax.swing.KeyStroke;
  *  commands; they do not affect previous drawings.
  *  These methods do not change the canvas size; so, if the <em>x</em>-
  *  and <em>y</em>-scales are different, squares will become rectangles
- *  and circles will become ellipsoidal.
+ *  and circles will become ellipses.
  *  <p>
  *  <b>Text.</b>
  *  You can use the following methods to annotate your drawings with text:
@@ -273,10 +291,16 @@ import javax.swing.KeyStroke;
  *  <li> {@link #setFont(Font font)}
  *  </ul>
  *  <p>
- *  You use the {@link Font} data type to specify the font. This allows you to
+ *  To specify the font, you use the {@link Font} data type,
+ *  which is defined in Java's {@link java.awt} package.
+ *  This allows you to
  *  choose the face, size, and style of the font. For example, the following
  *  code fragment sets the font to Arial Bold, 60 point.
+ *  The <code>import</code> statement allows you to refer to <code>Font</code>
+ *  directly, without needing the fully qualified name <code>java.awt.Font</code>.
  *  <pre>
+ *   import java.awt.Font;
+ *   ...
  *   Font font = new Font("Arial", Font.BOLD, 60);
  *   StdDraw.setFont(font);
  *   StdDraw.text(0.5, 0.5, "Hello, World");
@@ -292,22 +316,22 @@ import javax.swing.KeyStroke;
  *  </ul>
  *  <p>
  *  These methods draw the specified image, centered at (<em>x</em>, <em>y</em>).
- *  The supported image formats are JPEG, PNG, and GIF.
+ *  The image must be in a supported file format (typically JPEG, PNG, GIF TIFF, and BMP).
  *  The image will display at its native size, independent of the coordinate system.
  *  Optionally, you can rotate the image a specified number of degrees counterclockwise
  *  or rescale it to fit snugly inside a width-by-height bounding box.
  *  <p>
  *  <b>Saving to a file.</b>
- *  You save your image to a file using the <em>File → Save</em> menu option.
- *  You can also save a file programatically using the following method:
+ *  You can save your image to a file using the <em>File → Save</em> menu option.
+ *  You can also save a file programmatically using the following method:
  *  <ul>
  *  <li> {@link #save(String filename)}
  *  </ul>
  *  <p>
- *  The supported image formats are JPEG and PNG. The filename must have either the
- *  extension .jpg or .png.
- *  We recommend using PNG for drawing that consist solely of geometric shapes and JPEG 
- *  for drawings that contains pictures.
+ *  You can save the drawing to a file in a supported file format
+ *  (typically JPEG, PNG, GIF TIFF, and BMP).
+ *  We recommend using PNG for drawing that consist solely of geometric shapes
+ *  and JPEG for drawings that contains pictures.
  *  <p>
  *  <b>Clearing the canvas.</b>
  *  To clear the entire drawing canvas, you can use the following methods:
@@ -341,7 +365,7 @@ import javax.swing.KeyStroke;
  *  all drawing takes place on the <em>offscreen canvas</em>. The offscreen canvas
  *  is not displayed. Only when you call
  *  {@link #show()} does your drawing get copied from the offscreen canvas to
- *  the onscreen canvas, where it is displayed in the standard drawing window. You 
+ *  the onscreen canvas, where it is displayed in the standard drawing window. You
  *  can think of double buffering as collecting all of the lines, points, shapes,
  *  and text that you tell it to draw, and then drawing them all
  *  <em>simultaneously</em>, upon request.
@@ -415,25 +439,23 @@ import javax.swing.KeyStroke;
  *  </ul>
  *  <p>
  *  These methods are useful when you want to temporarily change a
- *  control parameter and reset it back to its original value.
+ *  control parameter and, later, reset it back to its original value.
  *  <p>
  *  <b>Corner cases.</b>
- *  To avoid clutter, the API doesn't explicitly refer to arguments that are
- *  null, infinity, or NaN.
+ *  Here are some corner cases.
  *  <ul>
- *  <li> Any method that is passed a {@code null} argument will throw an
- *       {@link IllegalArgumentException}.
- *  <li> Except as noted in the APIs, drawing an object outside (or partly outside)
- *       the canvas is permitted—however, only the part of the object that
- *       appears inside the canvas will be visible.
- *  <li> Except as noted in the APIs, all methods accept {@link Double#NaN},
- *       {@link Double#POSITIVE_INFINITY}, and {@link Double#NEGATIVE_INFINITY}
- *       as arugments. An object drawn with an <em>x</em>- or <em>y</em>-coordinate
- *       that is NaN will behave as if it is outside the canvas, and will not be visible.
+ *  <li> Drawing an object outside (or partly outside) the canvas is permitted.
+ *       However, only the part of the object that appears inside the canvas
+ *       will be visible.
  *  <li> Due to floating-point issues, an object drawn with an <em>x</em>- or
  *       <em>y</em>-coordinate that is way outside the canvas (such as the line segment
- *       from (0.5, –&infin;) to (0.5, &infin;) may not be visible even in the
+ *       from (0.5, –10^308) to (0.5, 10^308) may not be visible even in the
  *       part of the canvas where it should be.
+ *  <li> Any method that is passed a {@code null} argument will throw an
+ *       {@link IllegalArgumentException}.
+ *  <li> Any method that is passed a {@link Double#NaN},
+ *       {@link Double#POSITIVE_INFINITY}, or {@link Double#NEGATIVE_INFINITY}
+ *       argument will throw an {@link IllegalArgumentException}.
  *  </ul>
  *  <p>
  *  <b>Performance tricks.</b>
@@ -458,9 +480,6 @@ import javax.swing.KeyStroke;
  *  <li> The {@code picture()} methods may not draw the portion of the image that is
  *       inside the canvas if the center point (<em>x</em>, <em>y</em>) is outside the
  *       canvas.
- *       This bug appears only on some systems.
- *  <li> Some methods may not draw the portion of the geometric object that is inside the
- *       canvas if the <em>x</em>- or <em>y</em>-coordinates are infinite.
  *       This bug appears only on some systems.
  *  </ul>
  *  <p>
@@ -571,6 +590,12 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     // current pen color
     private static Color penColor;
 
+    // default title of standard drawing window
+    private static final String DEFAULT_WINDOW_TITLE = "Standard Draw";
+
+    // current title of standard drawing window
+    private static String windowTitle = DEFAULT_WINDOW_TITLE;
+
     // default canvas size is DEFAULT_SIZE-by-DEFAULT_SIZE
     private static final int DEFAULT_SIZE = 512;
     private static int width  = DEFAULT_SIZE;
@@ -595,8 +620,8 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     private static double xmin, ymin, xmax, ymax;
 
     // for synchronization
-    private static Object mouseLock = new Object();
-    private static Object keyLock = new Object();
+    private static final Object MOUSE_LOCK = new Object();
+    private static final Object KEY_LOCK = new Object();
 
     // default font
     private static final Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 16);
@@ -620,10 +645,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     private static double mouseY = 0;
 
     // queue of typed key characters
-    private static LinkedList<Character> keysTyped = new LinkedList<Character>();
+    private static LinkedList<Character> keysTyped;
 
     // set of key codes currently pressed down
-    private static TreeSet<Integer> keysDown = new TreeSet<Integer>();
+    private static TreeSet<Integer> keysDown;
 
     // singleton pattern: client can't instantiate
     private StdDraw() { }
@@ -635,10 +660,20 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
+     * Makes the drawing window visible or invisible.
+     *
+     * @param  isVisible if {@code true}, makes the drawing window visible,
+     *         otherwise hides the drawing window.
+     */
+    public static void setVisible(boolean isVisible) {
+        frame.setVisible(isVisible);
+    }
+
+    /**
      * Sets the canvas (drawing area) to be 512-by-512 pixels.
      * This also erases the current drawing and resets the coordinate system,
      * pen radius, pen color, and font back to their default values.
-     * Ordinarly, this method is called once, at the very beginning
+     * Ordinarily, this method is called once, at the very beginning
      * of a program.
      */
     public static void setCanvasSize() {
@@ -649,7 +684,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * Sets the canvas (drawing area) to be <em>width</em>-by-<em>height</em> pixels.
      * This also erases the current drawing and resets the coordinate system,
      * pen radius, pen color, and font back to their default values.
-     * Ordinarly, this method is called once, at the very beginning
+     * Ordinarily, this method is called once, at the very beginning
      * of a program.
      *
      * @param  canvasWidth the width as a number of pixels
@@ -658,8 +693,8 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *         {@code canvasHeight} are positive
      */
     public static void setCanvasSize(int canvasWidth, int canvasHeight) {
-        if (canvasWidth <= 0 || canvasHeight <= 0)
-            throw new IllegalArgumentException("width and height must be positive");
+        if (canvasWidth <= 0) throw new IllegalArgumentException("width must be positive");
+        if (canvasHeight <= 0) throw new IllegalArgumentException("height must be positive");
         width = canvasWidth;
         height = canvasHeight;
         init();
@@ -667,80 +702,131 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
     // init
     private static void init() {
-        if (frame != null) frame.setVisible(false);
-        frame = new JFrame();
-        offscreenImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        onscreenImage  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        // JFrame stuff
+        if (frame == null) {
+            frame = new JFrame();
+            frame.addKeyListener(std);    // JLabel cannot get keyboard focus
+            frame.setFocusTraversalKeysEnabled(false);  // allow VK_TAB with isKeyPressed()
+            frame.setResizable(false);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);            // closes all windows
+            // frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);      // closes only current window
+            frame.setTitle(windowTitle);
+            frame.setJMenuBar(createMenuBar());
+        }
+
+        // BufferedImage stuff
+        offscreenImage = new BufferedImage(2*width, 2*height, BufferedImage.TYPE_INT_ARGB);
+        onscreenImage  = new BufferedImage(2*width, 2*height, BufferedImage.TYPE_INT_ARGB);
         offscreen = offscreenImage.createGraphics();
         onscreen  = onscreenImage.createGraphics();
+        offscreen.scale(2.0, 2.0);  // since we made it 2x as big
+
+        // initialize drawing window
         setXscale();
         setYscale();
         offscreen.setColor(DEFAULT_CLEAR_COLOR);
         offscreen.fillRect(0, 0, width, height);
+        onscreen.setColor(DEFAULT_CLEAR_COLOR);
+        onscreen.fillRect(0, 0, width, height);
         setPenColor();
         setPenRadius();
         setFont();
-        clear();
+
+        // initialize keystroke buffers
+        keysTyped = new LinkedList<Character>();
+        keysDown = new TreeSet<Integer>();
 
         // add antialiasing
-        RenderingHints hints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-                                                  RenderingHints.VALUE_ANTIALIAS_ON);
+        RenderingHints hints = new RenderingHints(null);
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         offscreen.addRenderingHints(hints);
 
-        // frame stuff
-        ImageIcon icon = new ImageIcon(onscreenImage);
+        // ImageIcon stuff
+        RetinaImageIcon icon = new RetinaImageIcon(onscreenImage);
         JLabel draw = new JLabel(icon);
-
         draw.addMouseListener(std);
         draw.addMouseMotionListener(std);
 
+        // JFrame stuff
         frame.setContentPane(draw);
-        frame.addKeyListener(std);    // JLabel cannot get keyboard focus
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);            // closes all windows
-        // frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);      // closes only current window
-        frame.setTitle("Standard Draw");
-        frame.setJMenuBar(createMenuBar());
         frame.pack();
         frame.requestFocusInWindow();
         frame.setVisible(true);
     }
 
-    // create the menu bar (changed to private)
+    // create the menu bar
     private static JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("File");
         menuBar.add(menu);
         JMenuItem menuItem1 = new JMenuItem(" Save...   ");
         menuItem1.addActionListener(std);
+        // Java 11: use getMenuShortcutKeyMaskEx()
+        // Java 8:  use getMenuShortcutKeyMask()
         menuItem1.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
-                                Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+                                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
         menu.add(menuItem1);
         return menuBar;
     }
 
+   /***************************************************************************
+    *  Input validation helper methods.
+    ***************************************************************************/
+
+    // throw an IllegalArgumentException if x is NaN or infinite
+    private static void validate(double x, String name) {
+        if (Double.isNaN(x)) throw new IllegalArgumentException(name + " is NaN");
+        if (Double.isInfinite(x)) throw new IllegalArgumentException(name + " is infinite");
+    }
+
+    // throw an IllegalArgumentException if s is null
+    private static void validateNonnegative(double x, String name) {
+        if (x < 0) throw new IllegalArgumentException(name + " negative");
+    }
+
+    // throw an IllegalArgumentException if s is null
+    private static void validateNotNull(Object x, String name) {
+        if (x == null) throw new IllegalArgumentException(name + " is null");
+    }
+
+
+   /***************************************************************************
+    *  Set the title of standard drawing window.
+    ***************************************************************************/
+
+    /**
+     * Sets the title of the standard drawing window to the specified string.
+     *
+     * @param  title the title
+     * @throws IllegalArgumentException if {@code title} is {@code null}
+     */
+    public static void setTitle(String title) {
+        validateNotNull(title, "title");
+        frame.setTitle(title);
+        windowTitle = title;
+    }
 
    /***************************************************************************
     *  User and screen coordinate systems.
     ***************************************************************************/
 
     /**
-     * Sets the <em>x</em>-scale to be the default (between 0.0 and 1.0).
+     * Sets the <em>x</em>-scale to the default range (between 0.0 and 1.0).
      */
     public static void setXscale() {
         setXscale(DEFAULT_XMIN, DEFAULT_XMAX);
     }
 
     /**
-     * Sets the <em>y</em>-scale to be the default (between 0.0 and 1.0).
+     * Sets the <em>y</em>-scale to the default range (between 0.0 and 1.0).
      */
     public static void setYscale() {
         setYscale(DEFAULT_YMIN, DEFAULT_YMAX);
     }
 
     /**
-     * Sets the <em>x</em>-scale and <em>y</em>-scale to be the default
+     * Sets both the <em>x</em>-scale and <em>y</em>-scale to the default range
      * (between 0.0 and 1.0).
      */
     public static void setScale() {
@@ -754,11 +840,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  min the minimum value of the <em>x</em>-scale
      * @param  max the maximum value of the <em>x</em>-scale
      * @throws IllegalArgumentException if {@code (max == min)}
+     * @throws IllegalArgumentException if either {@code min} or {@code max} is either NaN or infinite
      */
     public static void setXscale(double min, double max) {
+        validate(min, "min");
+        validate(max, "max");
         double size = max - min;
         if (size == 0.0) throw new IllegalArgumentException("the min and max are the same");
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             xmin = min - BORDER * size;
             xmax = max + BORDER * size;
         }
@@ -770,11 +859,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  min the minimum value of the <em>y</em>-scale
      * @param  max the maximum value of the <em>y</em>-scale
      * @throws IllegalArgumentException if {@code (max == min)}
+     * @throws IllegalArgumentException if either {@code min} or {@code max} is either NaN or infinite
      */
     public static void setYscale(double min, double max) {
+        validate(min, "min");
+        validate(max, "max");
         double size = max - min;
         if (size == 0.0) throw new IllegalArgumentException("the min and max are the same");
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             ymin = min - BORDER * size;
             ymax = max + BORDER * size;
         }
@@ -786,11 +878,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  min the minimum value of the <em>x</em>- and <em>y</em>-scales
      * @param  max the maximum value of the <em>x</em>- and <em>y</em>-scales
      * @throws IllegalArgumentException if {@code (max == min)}
+     * @throws IllegalArgumentException if either {@code min} or {@code max} is either NaN or infinite
      */
     public static void setScale(double min, double max) {
+        validate(min, "min");
+        validate(max, "max");
         double size = max - min;
         if (size == 0.0) throw new IllegalArgumentException("the min and max are the same");
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             xmin = min - BORDER * size;
             xmax = max + BORDER * size;
             ymin = min - BORDER * size;
@@ -818,8 +913,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * Clears the screen to the specified color.
      *
      * @param color the color to make the background
+     * @throws IllegalArgumentException if {@code color} is {@code null}
      */
     public static void clear(Color color) {
+        validateNotNull(color, "color");
         offscreen.setColor(color);
         offscreen.fillRect(0, 0, width, height);
         offscreen.setColor(penColor);
@@ -852,10 +949,12 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * The pen radius is not affected by coordinate scaling.
      *
      * @param  radius the radius of the pen
-     * @throws IllegalArgumentException if {@code radius} is negative
+     * @throws IllegalArgumentException if {@code radius} is negative, NaN, or infinite
      */
     public static void setPenRadius(double radius) {
-        if (!(radius >= 0)) throw new IllegalArgumentException("pen radius must be nonnegative");
+        validate(radius, "pen radius");
+        validateNonnegative(radius, "pen radius");
+
         penRadius = radius;
         float scaledPenRadius = (float) (radius * DEFAULT_SIZE);
         BasicStroke stroke = new BasicStroke(scaledPenRadius, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -873,7 +972,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Set the pen color to the default color (black).
+     * Sets the pen color to the default color (black).
      */
     public static void setPenColor() {
         setPenColor(DEFAULT_PEN_COLOR);
@@ -890,9 +989,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * {@code StdDraw.YELLOW}.
      *
      * @param color the color to make the pen
+     * @throws IllegalArgumentException if {@code color} is {@code null}
      */
     public static void setPenColor(Color color) {
-        if (color == null) throw new IllegalArgumentException();
+        validateNotNull(color, "color");
         penColor = color;
         offscreen.setColor(penColor);
     }
@@ -907,9 +1007,9 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *         or {@code blue} is outside its prescribed range
      */
     public static void setPenColor(int red, int green, int blue) {
-        if (red   < 0 || red   >= 256) throw new IllegalArgumentException("amount of red must be between 0 and 255");
-        if (green < 0 || green >= 256) throw new IllegalArgumentException("amount of green must be between 0 and 255");
-        if (blue  < 0 || blue  >= 256) throw new IllegalArgumentException("amount of blue must be between 0 and 255");
+        if (red   < 0 || red   >= 256) throw new IllegalArgumentException("red must be between 0 and 255");
+        if (green < 0 || green >= 256) throw new IllegalArgumentException("green must be between 0 and 255");
+        if (blue  < 0 || blue  >= 256) throw new IllegalArgumentException("blue must be between 0 and 255");
         setPenColor(new Color(red, green, blue));
     }
 
@@ -933,9 +1033,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * Sets the font to the specified value.
      *
      * @param font the font
+     * @throws IllegalArgumentException if {@code font} is {@code null}
      */
     public static void setFont(Font font) {
-        if (font == null) throw new IllegalArgumentException();
+        validateNotNull(font, "font");
         StdDraw.font = font;
     }
 
@@ -952,8 +1053,13 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y0 the <em>y</em>-coordinate of one endpoint
      * @param  x1 the <em>x</em>-coordinate of the other endpoint
      * @param  y1 the <em>y</em>-coordinate of the other endpoint
+     * @throws IllegalArgumentException if any coordinate is either NaN or infinite
      */
     public static void line(double x0, double y0, double x1, double y1) {
+        validate(x0, "x0");
+        validate(y0, "y0");
+        validate(x1, "x1");
+        validate(y1, "y1");
         offscreen.draw(new Line2D.Double(scaleX(x0), scaleY(y0), scaleX(x1), scaleY(y1)));
         draw();
     }
@@ -965,8 +1071,11 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *
      * @param  x the <em>x</em>-coordinate of the pixel
      * @param  y the <em>y</em>-coordinate of the pixel
+     * @throws IllegalArgumentException if {@code x} or {@code y} is either NaN or infinite
      */
     private static void pixel(double x, double y) {
+        validate(x, "x");
+        validate(y, "y");
         offscreen.fillRect((int) Math.round(scaleX(x)), (int) Math.round(scaleY(y)), 1, 1);
     }
 
@@ -977,8 +1086,12 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *
      * @param x the <em>x</em>-coordinate of the point
      * @param y the <em>y</em>-coordinate of the point
+     * @throws IllegalArgumentException if either {@code x} or {@code y} is either NaN or infinite
      */
     public static void point(double x, double y) {
+        validate(x, "x");
+        validate(y, "y");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double r = penRadius;
@@ -1000,9 +1113,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y the <em>y</em>-coordinate of the center of the circle
      * @param  radius the radius of the circle
      * @throws IllegalArgumentException if {@code radius} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void circle(double x, double y, double radius) {
-        if (!(radius >= 0)) throw new IllegalArgumentException("radius must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(radius, "radius");
+        validateNonnegative(radius, "radius");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*radius);
@@ -1019,9 +1137,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y the <em>y</em>-coordinate of the center of the circle
      * @param  radius the radius of the circle
      * @throws IllegalArgumentException if {@code radius} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void filledCircle(double x, double y, double radius) {
-        if (!(radius >= 0)) throw new IllegalArgumentException("radius must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(radius, "radius");
+        validateNonnegative(radius, "radius");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*radius);
@@ -1042,10 +1165,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  semiMinorAxis is the semiminor axis of the ellipse
      * @throws IllegalArgumentException if either {@code semiMajorAxis}
      *         or {@code semiMinorAxis} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void ellipse(double x, double y, double semiMajorAxis, double semiMinorAxis) {
-        if (!(semiMajorAxis >= 0)) throw new IllegalArgumentException("ellipse semimajor axis must be nonnegative");
-        if (!(semiMinorAxis >= 0)) throw new IllegalArgumentException("ellipse semiminor axis must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(semiMajorAxis, "semimajor axis");
+        validate(semiMinorAxis, "semiminor axis");
+        validateNonnegative(semiMajorAxis, "semimajor axis");
+        validateNonnegative(semiMinorAxis, "semiminor axis");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*semiMajorAxis);
@@ -1056,7 +1185,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Draws an ellipse with the specified semimajor and semiminor axes,
+     * Draws a filled ellipse with the specified semimajor and semiminor axes,
      * centered at (<em>x</em>, <em>y</em>).
      *
      * @param  x the <em>x</em>-coordinate of the center of the ellipse
@@ -1065,10 +1194,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  semiMinorAxis is the semiminor axis of the ellipse
      * @throws IllegalArgumentException if either {@code semiMajorAxis}
      *         or {@code semiMinorAxis} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void filledEllipse(double x, double y, double semiMajorAxis, double semiMinorAxis) {
-        if (!(semiMajorAxis >= 0)) throw new IllegalArgumentException("ellipse semimajor axis must be nonnegative");
-        if (!(semiMinorAxis >= 0)) throw new IllegalArgumentException("ellipse semiminor axis must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(semiMajorAxis, "semimajor axis");
+        validate(semiMinorAxis, "semiminor axis");
+        validateNonnegative(semiMajorAxis, "semimajor axis");
+        validateNonnegative(semiMinorAxis, "semiminor axis");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*semiMajorAxis);
@@ -1090,9 +1225,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  angle2 the angle at the end of the arc. For example, if
      *         you want a 90 degree arc, then angle2 should be angle1 + 90.
      * @throws IllegalArgumentException if {@code radius} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void arc(double x, double y, double radius, double angle1, double angle2) {
-        if (radius < 0) throw new IllegalArgumentException("arc radius must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(radius, "arc radius");
+        validate(angle1, "angle1");
+        validate(angle2, "angle2");
+        validateNonnegative(radius, "arc radius");
+
         while (angle2 < angle1) angle2 += 360;
         double xs = scaleX(x);
         double ys = scaleY(y);
@@ -1104,15 +1246,20 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Draws a square of side length 2r, centered at (<em>x</em>, <em>y</em>).
+     * Draws a square of the specified size, centered at (<em>x</em>, <em>y</em>).
      *
      * @param  x the <em>x</em>-coordinate of the center of the square
      * @param  y the <em>y</em>-coordinate of the center of the square
      * @param  halfLength one half the length of any side of the square
      * @throws IllegalArgumentException if {@code halfLength} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void square(double x, double y, double halfLength) {
-        if (!(halfLength >= 0)) throw new IllegalArgumentException("half length must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(halfLength, "halfLength");
+        validateNonnegative(halfLength, "half length");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*halfLength);
@@ -1129,9 +1276,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y the <em>y</em>-coordinate of the center of the square
      * @param  halfLength one half the length of any side of the square
      * @throws IllegalArgumentException if {@code halfLength} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void filledSquare(double x, double y, double halfLength) {
-        if (!(halfLength >= 0)) throw new IllegalArgumentException("half length must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(halfLength, "halfLength");
+        validateNonnegative(halfLength, "half length");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*halfLength);
@@ -1150,10 +1302,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  halfWidth one half the width of the rectangle
      * @param  halfHeight one half the height of the rectangle
      * @throws IllegalArgumentException if either {@code halfWidth} or {@code halfHeight} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void rectangle(double x, double y, double halfWidth, double halfHeight) {
-        if (!(halfWidth  >= 0)) throw new IllegalArgumentException("half width must be nonnegative");
-        if (!(halfHeight >= 0)) throw new IllegalArgumentException("half height must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(halfWidth, "halfWidth");
+        validate(halfHeight, "halfHeight");
+        validateNonnegative(halfWidth, "half width");
+        validateNonnegative(halfHeight, "half height");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*halfWidth);
@@ -1171,10 +1329,16 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  halfWidth one half the width of the rectangle
      * @param  halfHeight one half the height of the rectangle
      * @throws IllegalArgumentException if either {@code halfWidth} or {@code halfHeight} is negative
+     * @throws IllegalArgumentException if any argument is either NaN or infinite
      */
     public static void filledRectangle(double x, double y, double halfWidth, double halfHeight) {
-        if (!(halfWidth  >= 0)) throw new IllegalArgumentException("half width must be nonnegative");
-        if (!(halfHeight >= 0)) throw new IllegalArgumentException("half height must be nonnegative");
+        validate(x, "x");
+        validate(y, "y");
+        validate(halfWidth, "halfWidth");
+        validate(halfHeight, "halfHeight");
+        validateNonnegative(halfWidth, "half width");
+        validateNonnegative(halfHeight, "half height");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(2*halfWidth);
@@ -1186,7 +1350,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 
     /**
-     * Draws a polygon with the vertices 
+     * Draws a polygon with the vertices
      * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
      * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
      * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
@@ -1195,10 +1359,15 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y an array of all the <em>y</em>-coordinates of the polygon
      * @throws IllegalArgumentException unless {@code x[]} and {@code y[]}
      *         are of the same length
+     * @throws IllegalArgumentException if any coordinate is either NaN or infinite
+     * @throws IllegalArgumentException if either {@code x[]} or {@code y[]} is {@code null}
      */
     public static void polygon(double[] x, double[] y) {
-        if (x == null) throw new IllegalArgumentException("x-coordinate array is null");
-        if (y == null) throw new IllegalArgumentException("y-coordinate array is null");
+        validateNotNull(x, "x-coordinate array");
+        validateNotNull(y, "y-coordinate array");
+        for (int i = 0; i < x.length; i++) validate(x[i], "x[" + i + "]");
+        for (int i = 0; i < y.length; i++) validate(y[i], "y[" + i + "]");
+
         int n1 = x.length;
         int n2 = y.length;
         if (n1 != n2) throw new IllegalArgumentException("arrays must be of the same length");
@@ -1215,7 +1384,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Draws a polygon with the vertices 
+     * Draws a filled polygon with the vertices
      * (<em>x</em><sub>0</sub>, <em>y</em><sub>0</sub>),
      * (<em>x</em><sub>1</sub>, <em>y</em><sub>1</sub>), ...,
      * (<em>x</em><sub><em>n</em>–1</sub>, <em>y</em><sub><em>n</em>–1</sub>).
@@ -1224,10 +1393,15 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y an array of all the <em>y</em>-coordinates of the polygon
      * @throws IllegalArgumentException unless {@code x[]} and {@code y[]}
      *         are of the same length
+     * @throws IllegalArgumentException if any coordinate is either NaN or infinite
+     * @throws IllegalArgumentException if either {@code x[]} or {@code y[]} is {@code null}
      */
     public static void filledPolygon(double[] x, double[] y) {
-        if (x == null) throw new IllegalArgumentException("x-coordinate array is null");
-        if (y == null) throw new IllegalArgumentException("y-coordinate array is null");
+        validateNotNull(x, "x-coordinate array");
+        validateNotNull(y, "y-coordinate array");
+        for (int i = 0; i < x.length; i++) validate(x[i], "x[" + i + "]");
+        for (int i = 0; i < y.length; i++) validate(y[i], "y[" + i + "]");
+
         int n1 = x.length;
         int n2 = y.length;
         if (n1 != n2) throw new IllegalArgumentException("arrays must be of the same length");
@@ -1255,7 +1429,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
         ImageIcon icon = new ImageIcon(filename);
 
         // try to read from URL
-        if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+        if (icon.getImageLoadStatus() != MediaTracker.COMPLETE) {
             try {
                 URL url = new URL(filename);
                 icon = new ImageIcon(url);
@@ -1266,14 +1440,14 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
         }
 
         // in case file is inside a .jar (classpath relative to StdDraw)
-        if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+        if (icon.getImageLoadStatus() != MediaTracker.COMPLETE) {
             URL url = StdDraw.class.getResource(filename);
             if (url != null)
                 icon = new ImageIcon(url);
         }
 
         // in case file is inside a .jar (classpath relative to root of jar)
-        if ((icon == null) || (icon.getImageLoadStatus() != MediaTracker.COMPLETE)) {
+        if (icon.getImageLoadStatus() != MediaTracker.COMPLETE) {
             URL url = StdDraw.class.getResource("/" + filename);
             if (url == null) throw new IllegalArgumentException("image " + filename + " not found");
             icon = new ImageIcon(url);
@@ -1298,7 +1472,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = new URL(filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1308,7 +1482,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = StdDraw.class.getResource(filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1318,7 +1492,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
             URL url = StdDraw.class.getResource("/" + filename);
             BufferedImage image = ImageIO.read(url);
             return image;
-        } 
+        }
         catch (IOException e) {
             // ignore
         }
@@ -1327,7 +1501,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 */
     /**
      * Draws the specified image centered at (<em>x</em>, <em>y</em>).
-     * The supported image formats are JPEG, PNG, and GIF.
+     * The supported image formats are typically JPEG, PNG, GIF TIFF, and BMP.
      * As an optimization, the picture is cached, so there is no performance
      * penalty for redrawing the same image multiple times (e.g., in an animation).
      * However, if you change the picture file after drawing it, subsequent
@@ -1337,8 +1511,13 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @param  y the center <em>y</em>-coordinate of the image
      * @param  filename the name of the image/picture, e.g., "ball.gif"
      * @throws IllegalArgumentException if the image filename is invalid
+     * @throws IllegalArgumentException if either {@code x} or {@code y} is either NaN or infinite
      */
     public static void picture(double x, double y, String filename) {
+        validate(x, "x");
+        validate(y, "y");
+        validateNotNull(filename, "filename");
+
         // BufferedImage image = getImage(filename);
         Image image = getImage(filename);
         double xs = scaleX(x);
@@ -1356,15 +1535,22 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     /**
      * Draws the specified image centered at (<em>x</em>, <em>y</em>),
      * rotated given number of degrees.
-     * The supported image formats are JPEG, PNG, and GIF.
+     * The supported image formats are typically JPEG, PNG, GIF TIFF, and BMP.
      *
      * @param  x the center <em>x</em>-coordinate of the image
      * @param  y the center <em>y</em>-coordinate of the image
      * @param  filename the name of the image/picture, e.g., "ball.gif"
      * @param  degrees is the number of degrees to rotate counterclockwise
      * @throws IllegalArgumentException if the image filename is invalid
+     * @throws IllegalArgumentException if {@code x}, {@code y}, {@code degrees} is NaN or infinite
+     * @throws IllegalArgumentException if {@code filename} is {@code null}
      */
     public static void picture(double x, double y, String filename, double degrees) {
+        validate(x, "x");
+        validate(y, "y");
+        validate(degrees, "degrees");
+        validateNotNull(filename, "filename");
+
         // BufferedImage image = getImage(filename);
         Image image = getImage(filename);
         double xs = scaleX(x);
@@ -1385,7 +1571,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     /**
      * Draws the specified image centered at (<em>x</em>, <em>y</em>),
      * rescaled to the specified bounding box.
-     * The supported image formats are JPEG, PNG, and GIF.
+     * The supported image formats are typically JPEG, PNG, GIF TIFF, and BMP.
      *
      * @param  x the center <em>x</em>-coordinate of the image
      * @param  y the center <em>y</em>-coordinate of the image
@@ -1395,11 +1581,19 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @throws IllegalArgumentException if either {@code scaledWidth}
      *         or {@code scaledHeight} is negative
      * @throws IllegalArgumentException if the image filename is invalid
+     * @throws IllegalArgumentException if {@code x} or {@code y} is either NaN or infinite
+     * @throws IllegalArgumentException if {@code filename} is {@code null}
      */
     public static void picture(double x, double y, String filename, double scaledWidth, double scaledHeight) {
+        validate(x, "x");
+        validate(y, "y");
+        validate(scaledWidth, "scaled width");
+        validate(scaledHeight, "scaled height");
+        validateNotNull(filename, "filename");
+        validateNonnegative(scaledWidth, "scaled width");
+        validateNonnegative(scaledHeight, "scaled height");
+
         Image image = getImage(filename);
-        if (scaledWidth  < 0) throw new IllegalArgumentException("width  is negative: " + scaledWidth);
-        if (scaledHeight < 0) throw new IllegalArgumentException("height is negative: " + scaledHeight);
         double xs = scaleX(x);
         double ys = scaleY(y);
         double ws = factorX(scaledWidth);
@@ -1419,7 +1613,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     /**
      * Draws the specified image centered at (<em>x</em>, <em>y</em>), rotated
      * given number of degrees, and rescaled to the specified bounding box.
-     * The supported image formats are JPEG, PNG, and GIF.
+     * The supported image formats are typically JPEG, PNG, GIF TIFF, and BMP.
      *
      * @param  x the center <em>x</em>-coordinate of the image
      * @param  y the center <em>y</em>-coordinate of the image
@@ -1432,8 +1626,15 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @throws IllegalArgumentException if the image filename is invalid
      */
     public static void picture(double x, double y, String filename, double scaledWidth, double scaledHeight, double degrees) {
-        if (scaledWidth < 0) throw new IllegalArgumentException("width is negative: " + scaledWidth);
-        if (scaledHeight < 0) throw new IllegalArgumentException("height is negative: " + scaledHeight);
+        validate(x, "x");
+        validate(y, "y");
+        validate(scaledWidth, "scaled width");
+        validate(scaledHeight, "scaled height");
+        validate(degrees, "degrees");
+        validateNotNull(filename, "filename");
+        validateNonnegative(scaledWidth, "scaled width");
+        validateNonnegative(scaledHeight, "scaled height");
+
         Image image = getImage(filename);
         double xs = scaleX(x);
         double ys = scaleY(y);
@@ -1457,14 +1658,19 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     ***************************************************************************/
 
     /**
-     * Write the given text string in the current font, centered at (<em>x</em>, <em>y</em>).
+     * Writes the given text string in the current font, centered at (<em>x</em>, <em>y</em>).
      *
      * @param  x the center <em>x</em>-coordinate of the text
      * @param  y the center <em>y</em>-coordinate of the text
      * @param  text the text to write
+     * @throws IllegalArgumentException if {@code text} is {@code null}
+     * @throws IllegalArgumentException if {@code x} or {@code y} is either NaN or infinite
      */
     public static void text(double x, double y, String text) {
-        if (text == null) throw new IllegalArgumentException();
+        validate(x, "x");
+        validate(y, "y");
+        validateNotNull(text, "text");
+
         offscreen.setFont(font);
         FontMetrics metrics = offscreen.getFontMetrics();
         double xs = scaleX(x);
@@ -1476,15 +1682,21 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Write the given text string in the current font, centered at (<em>x</em>, <em>y</em>) and
+     * Writes the given text string in the current font, centered at (<em>x</em>, <em>y</em>) and
      * rotated by the specified number of degrees.
      * @param  x the center <em>x</em>-coordinate of the text
      * @param  y the center <em>y</em>-coordinate of the text
      * @param  text the text to write
      * @param  degrees is the number of degrees to rotate counterclockwise
+     * @throws IllegalArgumentException if {@code text} is {@code null}
+     * @throws IllegalArgumentException if {@code x}, {@code y}, or {@code degrees} is either NaN or infinite
      */
     public static void text(double x, double y, String text, double degrees) {
-        if (text == null) throw new IllegalArgumentException();
+        validate(x, "x");
+        validate(y, "y");
+        validate(degrees, "degrees");
+        validateNotNull(text, "text");
+
         double xs = scaleX(x);
         double ys = scaleY(y);
         offscreen.rotate(Math.toRadians(-degrees), xs, ys);
@@ -1494,13 +1706,18 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
 
     /**
-     * Write the given text string in the current font, left-aligned at (<em>x</em>, <em>y</em>).
+     * Writes the given text string in the current font, left-aligned at (<em>x</em>, <em>y</em>).
      * @param  x the <em>x</em>-coordinate of the text
      * @param  y the <em>y</em>-coordinate of the text
      * @param  text the text
+     * @throws IllegalArgumentException if {@code text} is {@code null}
+     * @throws IllegalArgumentException if {@code x} or {@code y} is either NaN or infinite
      */
     public static void textLeft(double x, double y, String text) {
-        if (text == null) throw new IllegalArgumentException();
+        validate(x, "x");
+        validate(y, "y");
+        validateNotNull(text, "text");
+
         offscreen.setFont(font);
         FontMetrics metrics = offscreen.getFontMetrics();
         double xs = scaleX(x);
@@ -1511,14 +1728,19 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Write the given text string in the current font, right-aligned at (<em>x</em>, <em>y</em>).
+     * Writes the given text string in the current font, right-aligned at (<em>x</em>, <em>y</em>).
      *
      * @param  x the <em>x</em>-coordinate of the text
      * @param  y the <em>y</em>-coordinate of the text
      * @param  text the text to write
+     * @throws IllegalArgumentException if {@code text} is {@code null}
+     * @throws IllegalArgumentException if {@code x} or {@code y} is either NaN or infinite
      */
     public static void textRight(double x, double y, String text) {
-        if (text == null) throw new IllegalArgumentException();
+        validate(x, "x");
+        validate(y, "y");
+        validateNotNull(text, "text");
+
         offscreen.setFont(font);
         FontMetrics metrics = offscreen.getFontMetrics();
         double xs = scaleX(x);
@@ -1530,25 +1752,28 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
 
-
     /**
      * Copies the offscreen buffer to the onscreen buffer, pauses for t milliseconds
      * and enables double buffering.
      * @param t number of milliseconds
+     * @throws IllegalArgumentException if {@code t} is negative
      * @deprecated replaced by {@link #enableDoubleBuffering()}, {@link #show()}, and {@link #pause(int t)}
      */
     @Deprecated
     public static void show(int t) {
+        validateNonnegative(t, "t");
         show();
         pause(t);
         enableDoubleBuffering();
     }
 
     /**
-     * Pause for t milliseconds. This method is intended to support computer animations.
+     * Pauses for t milliseconds. This method is intended to support computer animations.
      * @param t number of milliseconds
+     * @throws IllegalArgumentException if {@code t} is negative
      */
     public static void pause(int t) {
+        validateNonnegative(t, "t");
         try {
             Thread.sleep(t);
         }
@@ -1572,9 +1797,9 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Enable double buffering. All subsequent calls to 
+     * Enables double buffering. All subsequent calls to
      * drawing methods such as {@code line()}, {@code circle()},
-     * and {@code square()} will be deffered until the next call
+     * and {@code square()} will be deferred until the next call
      * to show(). Useful for animations.
      */
     public static void enableDoubleBuffering() {
@@ -1582,7 +1807,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     }
 
     /**
-     * Disable double buffering. All subsequent calls to 
+     * Disables double buffering. All subsequent calls to
      * drawing methods such as {@code line()}, {@code circle()},
      * and {@code square()} will be displayed on screen when called.
      * This is the default.
@@ -1598,48 +1823,32 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 
     /**
      * Saves the drawing to using the specified filename.
-     * The supported image formats are JPEG and PNG;
-     * the filename suffix must be {@code .jpg} or {@code .png}.
+     * The supported image formats are typically JPEG, PNG, GIF TIFF, and BMP.
      *
-     * @param  filename the name of the file with one of the required suffixes
+     * @param  filename the name of the file with one of the required format
+     * @throws IllegalArgumentException if {@code filename} is {@code null}
      */
     public static void save(String filename) {
-        if (filename == null) throw new IllegalArgumentException();
+        validateNotNull(filename, "filename");
+        if (filename.length() == 0) throw new IllegalArgumentException("argument to save() is the empty string");
         File file = new File(filename);
         String suffix = filename.substring(filename.lastIndexOf('.') + 1);
+        if (!filename.contains(".")) suffix = "";
 
-        // png files
-        if ("png".equalsIgnoreCase(suffix)) {
-            try {
-                ImageIO.write(onscreenImage, suffix, file);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            // if the file format supports transparency (such as PNG or GIF)
+            if (ImageIO.write(onscreenImage, suffix, file)) return;
+
+            // if the file format does not support transparency (such as JPEG or BMP)
+            BufferedImage saveImage = new BufferedImage(2*width, 2*height, BufferedImage.TYPE_INT_RGB);
+            saveImage.createGraphics().drawImage(onscreenImage, 0, 0, Color.WHITE, null);
+            if (ImageIO.write(saveImage, suffix, file)) return;
+
+            // failed to save the file; probably wrong format
+            System.out.printf("Error: the filetype '%s' is not supported\n", suffix);
         }
-
-        // need to change from ARGB to RGB for JPEG
-        // reference: http://archives.java.sun.com/cgi-bin/wa?A2=ind0404&L=java2d-interest&D=0&P=2727
-        else if ("jpg".equalsIgnoreCase(suffix)) {
-            WritableRaster raster = onscreenImage.getRaster();
-            WritableRaster newRaster;
-            newRaster = raster.createWritableChild(0, 0, width, height, 0, 0, new int[] {0, 1, 2});
-            DirectColorModel cm = (DirectColorModel) onscreenImage.getColorModel();
-            DirectColorModel newCM = new DirectColorModel(cm.getPixelSize(),
-                                                          cm.getRedMask(),
-                                                          cm.getGreenMask(),
-                                                          cm.getBlueMask());
-            BufferedImage rgbBuffer = new BufferedImage(newCM, newRaster, false,  null);
-            try {
-                ImageIO.write(rgbBuffer, suffix, file);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        else {
-            System.out.println("Invalid image file type: " + suffix);
+        catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -1651,9 +1860,10 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
     public void actionPerformed(ActionEvent e) {
         FileDialog chooser = new FileDialog(StdDraw.frame, "Use a .png or .jpg extension", FileDialog.SAVE);
         chooser.setVisible(true);
-        String filename = chooser.getFile();
-        if (filename != null) {
-            StdDraw.save(chooser.getDirectory() + File.separator + chooser.getFile());
+        String selectedDirectory = chooser.getDirectory();
+        String selectedFilename = chooser.getFile();
+        if (selectedDirectory != null && selectedFilename != null) {
+            StdDraw.save(selectedDirectory + selectedFilename);
         }
     }
 
@@ -1668,7 +1878,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @return {@code true} if the mouse is being pressed; {@code false} otherwise
      */
     public static boolean isMousePressed() {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             return isMousePressed;
         }
     }
@@ -1681,7 +1891,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Deprecated
     public static boolean mousePressed() {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             return isMousePressed;
         }
     }
@@ -1692,7 +1902,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @return the <em>x</em>-coordinate of the mouse
      */
     public static double mouseX() {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             return mouseX;
         }
     }
@@ -1703,7 +1913,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @return <em>y</em>-coordinate of the mouse
      */
     public static double mouseY() {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             return mouseY;
         }
     }
@@ -1738,7 +1948,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void mousePressed(MouseEvent e) {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             mouseX = StdDraw.userX(e.getX());
             mouseY = StdDraw.userY(e.getY());
             isMousePressed = true;
@@ -1750,7 +1960,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void mouseReleased(MouseEvent e) {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             isMousePressed = false;
         }
     }
@@ -1760,7 +1970,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void mouseDragged(MouseEvent e)  {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             mouseX = StdDraw.userX(e.getX());
             mouseY = StdDraw.userY(e.getY());
         }
@@ -1771,7 +1981,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void mouseMoved(MouseEvent e) {
-        synchronized (mouseLock) {
+        synchronized (MOUSE_LOCK) {
             mouseX = StdDraw.userX(e.getX());
             mouseY = StdDraw.userY(e.getY());
         }
@@ -1789,7 +1999,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *         by {@link #nextKeyTyped()}; {@code false} otherwise
      */
     public static boolean hasNextKeyTyped() {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             return !keysTyped.isEmpty();
         }
     }
@@ -1807,7 +2017,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      * @throws NoSuchElementException if there is no remaining key
      */
     public static char nextKeyTyped() {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             if (keysTyped.isEmpty()) {
                 throw new NoSuchElementException("your program has already processed all keystrokes");
             }
@@ -1829,7 +2039,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      *         {@code false} otherwise
      */
     public static boolean isKeyPressed(int keycode) {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             return keysDown.contains(keycode);
         }
     }
@@ -1840,7 +2050,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void keyTyped(KeyEvent e) {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             keysTyped.addFirst(e.getKeyChar());
         }
     }
@@ -1850,7 +2060,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             keysDown.add(e.getKeyCode());
         }
     }
@@ -1860,12 +2070,45 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        synchronized (keyLock) {
+        synchronized (KEY_LOCK) {
             keysDown.remove(e.getKeyCode());
         }
     }
 
 
+   /***************************************************************************
+    *  For improved resolution on Mac Retina displays.
+    ***************************************************************************/
+
+    private static class RetinaImageIcon extends ImageIcon {
+
+        public RetinaImageIcon(Image image) {
+            super(image);
+        }
+
+        public int getIconWidth() {
+            return super.getIconWidth() / 2;
+        }
+
+        /**
+         * Gets the height of the icon.
+         *
+         * @return the height in pixels of this icon
+         */
+        public int getIconHeight() {
+            return super.getIconHeight() / 2;
+        }
+
+        public synchronized void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.scale(0.5, 0.5);
+            super.paintIcon(c, g2, x * 2, y * 2);
+            g2.dispose();
+        }
+    }
 
 
     /**
@@ -1899,7 +2142,7 @@ public final class StdDraw implements ActionListener, MouseListener, MouseMotion
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

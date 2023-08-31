@@ -2,7 +2,7 @@
  *  Compilation:  javac ResizingArrayBag.java
  *  Execution:    java ResizingArrayBag
  *  Dependencies: StdIn.java StdOut.java
- *  
+ *
  *  Bag implementation with a resizing array.
  *
  ******************************************************************************/
@@ -13,8 +13,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- *  The {@code ResizingArrayBag} class represents a bag (or multiset) of 
- *  generic items. It supports insertion and iterating over the 
+ *  The {@code ResizingArrayBag} class represents a bag (or multiset) of
+ *  generic items. It supports insertion and iterating over the
  *  items in arbitrary order.
  *  <p>
  *  This implementation uses a resizing array.
@@ -30,6 +30,9 @@ import java.util.NoSuchElementException;
  *  @author Kevin Wayne
  */
 public class ResizingArrayBag<Item> implements Iterable<Item> {
+    // initial capacity of underlying resizing array
+    private static final int INIT_CAPACITY = 8;
+
     private Item[] a;         // array of items
     private int n;            // number of elements on bag
 
@@ -37,7 +40,7 @@ public class ResizingArrayBag<Item> implements Iterable<Item> {
      * Initializes an empty bag.
      */
     public ResizingArrayBag() {
-        a = (Item[]) new Object[2];
+        a = (Item[]) new Object[INIT_CAPACITY];
         n = 0;
     }
 
@@ -60,10 +63,10 @@ public class ResizingArrayBag<Item> implements Iterable<Item> {
     // resize the underlying array holding the elements
     private void resize(int capacity) {
         assert capacity >= n;
-        Item[] temp = (Item[]) new Object[capacity];
+        Item[] copy = (Item[]) new Object[capacity];
         for (int i = 0; i < n; i++)
-            temp[i] = a[i];
-        a = temp;
+            copy[i] = a[i];
+        a = copy;
     }
 
     /**
@@ -84,11 +87,13 @@ public class ResizingArrayBag<Item> implements Iterable<Item> {
         return new ArrayIterator();
     }
 
-    // an iterator, doesn't implement remove() since it's optional
+    // an array iterator
     private class ArrayIterator implements Iterator<Item> {
         private int i = 0;
-        public boolean hasNext()  { return i < n;                               }
-        public void remove()      { throw new UnsupportedOperationException();  }
+
+        public boolean hasNext() {
+            return i < n;
+        }
 
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
@@ -116,7 +121,7 @@ public class ResizingArrayBag<Item> implements Iterable<Item> {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

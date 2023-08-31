@@ -3,7 +3,7 @@
  *  Execution:    java HexDump < file
  *  Dependencies: BinaryStdIn.java StdOut.java
  *  Data file:    https://algs4.cs.princeton.edu/55compression/abra.txt
- *  
+ *
  *  Reads in a binary file and writes out the bytes in hex, 16 per line.
  *
  *  % more abra.txt
@@ -18,7 +18,7 @@
  *  --------------------------
  *   - Similar to the Unix utilities od (octal dump) or hexdump (hexadecimal dump).
  *
- *  % od -t x1 < abra.txt 
+ *  % od -t x1 < abra.txt
  *  0000000 41 42 52 41 43 41 44 41 42 52 41 21
  *  0000014
  *
@@ -31,7 +31,7 @@ package edu.princeton.cs.algs4;
  *  of a binary file in hexadecimal.
  *  <p>
  *  For additional documentation,
- *  see <a href="https://algs4.cs.princeton.edu/55compress">Section 5.5</a> of
+ *  see <a href="https://algs4.cs.princeton.edu/55compression">Section 5.5</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *  <p>
  *  See also {@link BinaryDump} and {@link PictureDump}.
@@ -49,7 +49,7 @@ public class HexDump {
 
     /**
      * Reads in a sequence of bytes from standard input and writes
-     * them to standard output using hexademical notation, k hex digits
+     * them to standard output using hexadecimal notation, k hex digits
      * per line, where k is given as a command-line integer (defaults
      * to 16 if no integer is specified); also writes the number
      * of bits.
@@ -80,7 +80,7 @@ public class HexDump {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

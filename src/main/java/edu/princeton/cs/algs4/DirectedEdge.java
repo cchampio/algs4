@@ -9,20 +9,21 @@
 
 package edu.princeton.cs.algs4;
 /**
- *  The {@code DirectedEdge} class represents a weighted edge in an 
+ *  The {@code DirectedEdge} class represents a weighted edge in an
  *  {@link EdgeWeightedDigraph}. Each edge consists of two integers
  *  (naming the two vertices) and a real-value weight. The data type
  *  provides methods for accessing the two endpoints of the directed edge and
  *  the weight.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of
+ *  For additional documentation,
+ *  see <a href="https://algs4.cs.princeton.edu/44sp">Section 4.4</a> of
  *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
  */
 
-public class DirectedEdge { 
+public class DirectedEdge {
     private final int v;
     private final int w;
     private final double weight;
@@ -38,8 +39,8 @@ public class DirectedEdge {
      * @throws IllegalArgumentException if {@code weight} is {@code NaN}
      */
     public DirectedEdge(int v, int w, double weight) {
-        if (v < 0) throw new IllegalArgumentException("Vertex names must be nonnegative integers");
-        if (w < 0) throw new IllegalArgumentException("Vertex names must be nonnegative integers");
+        if (v < 0) throw new IllegalArgumentException("Vertex names must be non-negative integers");
+        if (w < 0) throw new IllegalArgumentException("Vertex names must be non-negative integers");
         if (Double.isNaN(weight)) throw new IllegalArgumentException("Weight is NaN");
         this.v = v;
         this.w = w;
@@ -90,7 +91,7 @@ public class DirectedEdge {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *

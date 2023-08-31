@@ -2,13 +2,13 @@
  *  Compilation:  javac BST.java
  *  Execution:    java BST
  *  Dependencies: StdIn.java StdOut.java Queue.java
- *  Data files:   https://algs4.cs.princeton.edu/32bst/tinyST.txt  
+ *  Data files:   https://algs4.cs.princeton.edu/32bst/tinyST.txt
  *
  *  A symbol table implemented with a binary search tree.
- * 
+ *
  *  % more tinyST.txt
  *  S E A R C H E X A M P L E
- *  
+ *
  *  % java BST < tinyST.txt
  *  A 8
  *  C 4
@@ -43,22 +43,26 @@ import java.util.NoSuchElementException;
  *  value associated with a key to {@code null} is equivalent to deleting the key
  *  from the symbol table.
  *  <p>
- *  This implementation uses an (unbalanced) binary search tree. It requires that
+ *  It requires that
  *  the key type implements the {@code Comparable} interface and calls the
  *  {@code compareTo()} and method to compare two keys. It does not call either
  *  {@code equals()} or {@code hashCode()}.
+ *  <p>
+ *  This implementation uses an (unbalanced) <em>binary search tree</em>.
  *  The <em>put</em>, <em>contains</em>, <em>remove</em>, <em>minimum</em>,
  *  <em>maximum</em>, <em>ceiling</em>, <em>floor</em>, <em>select</em>, and
- *  <em>rank</em>  operations each take
- *  linear time in the worst case, if the tree becomes unbalanced.
- *  The <em>size</em>, and <em>is-empty</em> operations take constant time.
- *  Construction takes constant time.
+ *  <em>rank</em>  operations each take &Theta;(<em>n</em>) time in the worst
+ *  case, where <em>n</em> is the number of key-value pairs.
+ *  The <em>size</em> and <em>is-empty</em> operations take &Theta;(1) time.
+ *  The keys method takes &Theta;(<em>n</em>) time in the worst case.
+ *  Construction takes &Theta;(1) time.
  *  <p>
- *  For additional documentation, see <a href="https://algs4.cs.princeton.edu/32bst">Section 3.2</a> of
- *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
- *  For other implementations, see {@link ST}, {@link BinarySearchST},
- *  {@link SequentialSearchST}, {@link RedBlackBST},
+ *  For alternative implementations of the symbol table API, see {@link ST},
+ *  {@link BinarySearchST}, {@link SequentialSearchST}, {@link RedBlackBST},
  *  {@link SeparateChainingHashST}, and {@link LinearProbingHashST},
+ *  For additional documentation, see
+ *  <a href="https://algs4.cs.princeton.edu/32bst">Section 3.2</a> of
+ *  <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
  *
  *  @author Robert Sedgewick
  *  @author Kevin Wayne
@@ -142,7 +146,7 @@ public class BST<Key extends Comparable<Key>, Value> {
     }
 
     /**
-     * Inserts the specified key-value pair into the symbol table, overwriting the old 
+     * Inserts the specified key-value pair into the symbol table, overwriting the old
      * value with the new value if the symbol table already contains the specified key.
      * Deletes the specified key (and its associated value) from this symbol table
      * if the specified value is {@code null}.
@@ -209,8 +213,8 @@ public class BST<Key extends Comparable<Key>, Value> {
     }
 
     /**
-     * Removes the specified key and its associated value from this symbol table     
-     * (if the key is in this symbol table).    
+     * Removes the specified key and its associated value from this symbol table
+     * (if the key is in this symbol table).
      *
      * @param  key the key
      * @throws IllegalArgumentException if {@code key} is {@code null}
@@ -227,17 +231,17 @@ public class BST<Key extends Comparable<Key>, Value> {
         int cmp = key.compareTo(x.key);
         if      (cmp < 0) x.left  = delete(x.left,  key);
         else if (cmp > 0) x.right = delete(x.right, key);
-        else { 
+        else {
             if (x.right == null) return x.left;
             if (x.left  == null) return x.right;
             Node t = x;
             x = min(t.right);
             x.right = deleteMin(t.right);
             x.left = t.left;
-        } 
+        }
         x.size = size(x.left) + size(x.right) + 1;
         return x;
-    } 
+    }
 
 
     /**
@@ -249,12 +253,12 @@ public class BST<Key extends Comparable<Key>, Value> {
     public Key min() {
         if (isEmpty()) throw new NoSuchElementException("calls min() with empty symbol table");
         return min(root).key;
-    } 
+    }
 
-    private Node min(Node x) { 
-        if (x.left == null) return x; 
-        else                return min(x.left); 
-    } 
+    private Node min(Node x) {
+        if (x.left == null) return x;
+        else                return min(x.left);
+    }
 
     /**
      * Returns the largest key in the symbol table.
@@ -265,12 +269,12 @@ public class BST<Key extends Comparable<Key>, Value> {
     public Key max() {
         if (isEmpty()) throw new NoSuchElementException("calls max() with empty symbol table");
         return max(root).key;
-    } 
+    }
 
     private Node max(Node x) {
-        if (x.right == null) return x; 
-        else                 return max(x.right); 
-    } 
+        if (x.right == null) return x;
+        else                 return max(x.right);
+    }
 
     /**
      * Returns the largest key in the symbol table less than or equal to {@code key}.
@@ -284,22 +288,25 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (key == null) throw new IllegalArgumentException("argument to floor() is null");
         if (isEmpty()) throw new NoSuchElementException("calls floor() with empty symbol table");
         Node x = floor(root, key);
-        if (x == null) return null;
+        if (x == null) throw new NoSuchElementException("argument to floor() is too small");
         else return x.key;
-    } 
+    }
 
     private Node floor(Node x, Key key) {
         if (x == null) return null;
         int cmp = key.compareTo(x.key);
         if (cmp == 0) return x;
         if (cmp <  0) return floor(x.left, key);
-        Node t = floor(x.right, key); 
+        Node t = floor(x.right, key);
         if (t != null) return t;
-        else return x; 
-    } 
+        else return x;
+    }
 
     public Key floor2(Key key) {
-        return floor2(root, key, null);
+        Key x = floor2(root, key, null);
+        if (x == null) throw new NoSuchElementException("argument to floor() is too small");
+        else return x;
+
     }
 
     private Key floor2(Node x, Key key, Key best) {
@@ -308,7 +315,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         if      (cmp  < 0) return floor2(x.left, key, best);
         else if (cmp  > 0) return floor2(x.right, key, x.key);
         else               return x.key;
-    } 
+    }
 
     /**
      * Returns the smallest key in the symbol table greater than or equal to {@code key}.
@@ -322,7 +329,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (key == null) throw new IllegalArgumentException("argument to ceiling() is null");
         if (isEmpty()) throw new NoSuchElementException("calls ceiling() with empty symbol table");
         Node x = ceiling(root, key);
-        if (x == null) return null;
+        if (x == null) throw new NoSuchElementException("argument to ceiling() is too large");
         else return x.key;
     }
 
@@ -330,39 +337,41 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (x == null) return null;
         int cmp = key.compareTo(x.key);
         if (cmp == 0) return x;
-        if (cmp < 0) { 
-            Node t = ceiling(x.left, key); 
+        if (cmp < 0) {
+            Node t = ceiling(x.left, key);
             if (t != null) return t;
-            else return x; 
-        } 
-        return ceiling(x.right, key); 
-    } 
-
-    /**
-     * Return the key in the symbol table whose rank is {@code k}.
-     * This is the (k+1)st smallest key in the symbol table.
-     *
-     * @param  k the order statistic
-     * @return the key in the symbol table of rank {@code k}
-     * @throws IllegalArgumentException unless {@code k} is between 0 and
-     *        <em>n</em>–1
-     */
-    public Key select(int k) {
-        if (k < 0 || k >= size()) {
-            throw new IllegalArgumentException("argument to select() is invalid: " + k);
+            else return x;
         }
-        Node x = select(root, k);
-        return x.key;
+        return ceiling(x.right, key);
     }
 
-    // Return key of rank k. 
-    private Node select(Node x, int k) {
-        if (x == null) return null; 
-        int t = size(x.left); 
-        if      (t > k) return select(x.left,  k); 
-        else if (t < k) return select(x.right, k-t-1); 
-        else            return x; 
-    } 
+    /**
+     * Return the key in the symbol table of a given {@code rank}.
+     * This key has the property that there are {@code rank} keys in
+     * the symbol table that are smaller. In other words, this key is the
+     * ({@code rank}+1)st smallest key in the symbol table.
+     *
+     * @param  rank the order statistic
+     * @return the key in the symbol table of given {@code rank}
+     * @throws IllegalArgumentException unless {@code rank} is between 0 and
+     *        <em>n</em>–1
+     */
+    public Key select(int rank) {
+        if (rank < 0 || rank >= size()) {
+            throw new IllegalArgumentException("argument to select() is invalid: " + rank);
+        }
+        return select(root, rank);
+    }
+
+    // Return key in BST rooted at x of given rank.
+    // Precondition: rank is in legal range.
+    private Key select(Node x, int rank) {
+        if (x == null) return null;
+        int leftSize = size(x.left);
+        if      (leftSize > rank) return select(x.left,  rank);
+        else if (leftSize < rank) return select(x.right, rank - leftSize - 1);
+        else                      return x.key;
+    }
 
     /**
      * Return the number of keys in the symbol table strictly less than {@code key}.
@@ -374,23 +383,24 @@ public class BST<Key extends Comparable<Key>, Value> {
     public int rank(Key key) {
         if (key == null) throw new IllegalArgumentException("argument to rank() is null");
         return rank(key, root);
-    } 
+    }
 
     // Number of keys in the subtree less than key.
     private int rank(Key key, Node x) {
-        if (x == null) return 0; 
-        int cmp = key.compareTo(x.key); 
-        if      (cmp < 0) return rank(key, x.left); 
-        else if (cmp > 0) return 1 + size(x.left) + rank(key, x.right); 
-        else              return size(x.left); 
-    } 
+        if (x == null) return 0;
+        int cmp = key.compareTo(x.key);
+        if      (cmp < 0) return rank(key, x.left);
+        else if (cmp > 0) return 1 + size(x.left) + rank(key, x.right);
+        else              return size(x.left);
+    }
 
     /**
-     * Returns all keys in the symbol table as an {@code Iterable}.
+     * Returns all keys in the symbol table in ascending order,
+     * as an {@code Iterable}.
      * To iterate over all of the keys in the symbol table named {@code st},
      * use the foreach notation: {@code for (Key key : st.keys())}.
      *
-     * @return all keys in the symbol table
+     * @return all keys in the symbol table in ascending order
      */
     public Iterable<Key> keys() {
         if (isEmpty()) return new Queue<Key>();
@@ -398,13 +408,13 @@ public class BST<Key extends Comparable<Key>, Value> {
     }
 
     /**
-     * Returns all keys in the symbol table in the given range,
-     * as an {@code Iterable}.
+     * Returns all keys in the symbol table in the given range
+     * in ascending order, as an {@code Iterable}.
      *
      * @param  lo minimum endpoint
      * @param  hi maximum endpoint
-     * @return all keys in the symbol table between {@code lo} 
-     *         (inclusive) and {@code hi} (inclusive)
+     * @return all keys in the symbol table between {@code lo}
+     *         (inclusive) and {@code hi} (inclusive) in ascending order
      * @throws IllegalArgumentException if either {@code lo} or {@code hi}
      *         is {@code null}
      */
@@ -415,23 +425,23 @@ public class BST<Key extends Comparable<Key>, Value> {
         Queue<Key> queue = new Queue<Key>();
         keys(root, queue, lo, hi);
         return queue;
-    } 
+    }
 
-    private void keys(Node x, Queue<Key> queue, Key lo, Key hi) { 
-        if (x == null) return; 
-        int cmplo = lo.compareTo(x.key); 
-        int cmphi = hi.compareTo(x.key); 
-        if (cmplo < 0) keys(x.left, queue, lo, hi); 
-        if (cmplo <= 0 && cmphi >= 0) queue.enqueue(x.key); 
-        if (cmphi > 0) keys(x.right, queue, lo, hi); 
-    } 
+    private void keys(Node x, Queue<Key> queue, Key lo, Key hi) {
+        if (x == null) return;
+        int cmplo = lo.compareTo(x.key);
+        int cmphi = hi.compareTo(x.key);
+        if (cmplo < 0) keys(x.left, queue, lo, hi);
+        if (cmplo <= 0 && cmphi >= 0) queue.enqueue(x.key);
+        if (cmphi > 0) keys(x.right, queue, lo, hi);
+    }
 
     /**
      * Returns the number of keys in the symbol table in the given range.
      *
      * @param  lo minimum endpoint
      * @param  hi maximum endpoint
-     * @return the number of keys in the symbol table between {@code lo} 
+     * @return the number of keys in the symbol table between {@code lo}
      *         (inclusive) and {@code hi} (inclusive)
      * @throws IllegalArgumentException if either {@code lo} or {@code hi}
      *         is {@code null}
@@ -495,13 +505,13 @@ public class BST<Key extends Comparable<Key>, Value> {
 
     // is the tree rooted at x a BST with all keys strictly between min and max
     // (if min or max is null, treat as empty constraint)
-    // Credit: Bob Dondero's elegant solution
+    // Credit: elegant solution due to Bob Dondero
     private boolean isBST(Node x, Key min, Key max) {
         if (x == null) return true;
         if (min != null && x.key.compareTo(min) <= 0) return false;
         if (max != null && x.key.compareTo(max) >= 0) return false;
         return isBST(x.left, min, x.key) && isBST(x.right, x.key, max);
-    } 
+    }
 
     // are the size fields correct?
     private boolean isSizeConsistent() { return isSizeConsistent(root); }
@@ -509,7 +519,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (x == null) return true;
         if (x.size != size(x.left) + size(x.right) + 1) return false;
         return isSizeConsistent(x.left) && isSizeConsistent(x.right);
-    } 
+    }
 
     // check that ranks are consistent
     private boolean isRankConsistent() {
@@ -526,7 +536,7 @@ public class BST<Key extends Comparable<Key>, Value> {
      *
      * @param args the command-line arguments
      */
-    public static void main(String[] args) { 
+    public static void main(String[] args) {
         BST<String, Integer> st = new BST<String, Integer>();
         for (int i = 0; !StdIn.isEmpty(); i++) {
             String key = StdIn.readString();
@@ -544,7 +554,7 @@ public class BST<Key extends Comparable<Key>, Value> {
 }
 
 /******************************************************************************
- *  Copyright 2002-2018, Robert Sedgewick and Kevin Wayne.
+ *  Copyright 2002-2022, Robert Sedgewick and Kevin Wayne.
  *
  *  This file is part of algs4.jar, which accompanies the textbook
  *
