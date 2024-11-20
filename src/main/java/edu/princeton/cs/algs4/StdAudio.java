@@ -30,8 +30,7 @@ import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
- *  <p><b>Overview.</b>
- *  The {@code StdAudio} class provides a basic capability for
+ *  The {@code StdAudio} class provides static methods for
  *  playing, reading, and saving audio.
  *  It uses a simple audio model that allows you
  *  to send one sample to the sound card at a time.
@@ -150,12 +149,17 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  *  <p>
  *  When saving files, {@code StdAudio} uses a sampling rate of 44,100 Hz,
  *  16 bits per sample, monaural audio, little endian, and linear PCM encoding.
+ *  When reading files, {@code StdAudio} converts to a sammpling rate of 44,100 Hz,
+ *  with 16 bits per sample.
  *
  *  <p>
  *  <b>Recording audio.</b>
  *  You can use the following methods to record audio samples that are
  *  played as a result of calls to {@link #play(double sample)} or
- *  {@link #play(double[] samples)}.
+ *  {@link #play(double[] samples)}. To record audio samples that are
+ *  played as a result of calls to {@link #play(String filename)},
+ *  first read them into an array using {@link #read(String filename)}
+ *  and call {@link #play(double[] samples)} on that array.
  *  <ul>
  *  <li> {@link #startRecording()}
  *  <li> {@link #stopRecording()}
@@ -377,12 +381,22 @@ public final class StdAudio {
 
     /**
      * Plays an audio file (in WAVE, AU, AIFF, or MIDI format) and waits for it to finish.
+     * The file extension must be either {@code .wav}, {@code .au},
+     * or {@code .aiff}.
      *
      * @param filename the name of the audio file
      * @throws IllegalArgumentException if unable to play {@code filename}
      * @throws IllegalArgumentException if {@code filename} is {@code null}
      */
     public static void play(String filename) {
+
+        // may not work for streaming file formats
+        if (isRecording) {
+            double[] samples = read(filename);
+            for (double sample : samples)
+                recordedSamples.enqueue(sample);
+        }
+
         AudioInputStream ais = getAudioInputStreamFromFile(filename);
         SourceDataLine line = null;
         int BUFFER_SIZE = 4096; // 4K buffer
@@ -413,9 +427,8 @@ public final class StdAudio {
     /**
      * Reads audio samples from a file (in WAVE, AU, AIFF, or MIDI format)
      * and returns them as a double array with values between –1.0 and +1.0.
-     * The sound format must use 16-bit audio data with a sampling rate of 44,100.
-     * The sound format can be either monoaural or stereo, and the bytes can
-     * be stored in either little endian or big endian order.
+     * The file extension must be either {@code .wav}, {@code .au},
+     * or {@code .aiff}.
      *
      * @param  filename the name of the audio file
      * @return the array of samples
@@ -470,7 +483,7 @@ public final class StdAudio {
 
     /**
      * Saves the double array as an audio file (using WAV, AU, or AIFF format).
-     * The file extension type must be either {@code .wav}, {@code .au},
+     * The file extension must be either {@code .wav}, {@code .au},
      * or {@code .aiff}.
      * The format uses a sampling rate of 44,100 Hz, 16-bit audio,
      * mono, signed PCM, ands little Endian.
@@ -547,6 +560,8 @@ public final class StdAudio {
     /**
      * Plays an audio file (in WAVE, AU, AIFF, or MIDI format) in its own
      * background thread. Multiple audio files can be played simultaneously.
+     * The file extension must be either {@code .wav}, {@code .au},
+     * or {@code .aiff}.
      *
      * @param filename the name of the audio file
      * @throws IllegalArgumentException if unable to play {@code filename}

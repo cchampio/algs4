@@ -42,8 +42,8 @@ import javax.swing.KeyStroke;
 
 
 /**
- *  This class provides methods for manipulating individual pixels of
- *  a grayscale image.
+ *  The <code>GrayscalePicture</code> data type provides a basic capability
+ *  for manipulating the individual pixels of a grayscale image.
  *  The original image can be read from a {@code PNG}, {@code GIF},
  *  or {@code JPEG} file or the user can create a blank image of a given dimension.
  *  This class includes methods for displaying the image in a window on
@@ -442,7 +442,13 @@ public final class GrayscalePicture implements ActionListener {
         if (file == null) throw new IllegalArgumentException("argument to save() is null");
         filename = file.getName();
         if (frame != null) frame.setTitle(filename);
+
         String suffix = filename.substring(filename.lastIndexOf('.') + 1);
+        if (!filename.contains(".") || suffix.length() == 0) {
+            System.out.printf("Error: the filename '%s' has no file extension, such as .jpg or .png\n", filename);
+            return;
+        }
+
         if ("jpg".equalsIgnoreCase(suffix) || "png".equalsIgnoreCase(suffix)) {
             try {
                 ImageIO.write(image, suffix, file);
@@ -467,7 +473,7 @@ public final class GrayscalePicture implements ActionListener {
         String selectedDirectory = chooser.getDirectory();
         String selectedFilename = chooser.getFile();
         if (selectedDirectory != null && selectedFilename != null) {
-            StdDraw.save(selectedDirectory + selectedFilename);
+            save(selectedDirectory + selectedFilename);
         }
     }
 

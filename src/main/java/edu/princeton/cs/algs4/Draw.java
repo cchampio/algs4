@@ -78,7 +78,7 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 /**
- *  <i>Draw</i>. This class provides a basic capability for
+ *  The <code>Draw</code> data type provides a basic capability for
  *  creating drawings with your programs. It uses a simple graphics model that
  *  allows you to create drawings consisting of points, lines, and curves
  *  in a window on your computer and to save the drawings to a file.
@@ -239,7 +239,7 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
     private Graphics2D offscreen, onscreen;
 
     // the frame for drawing to the screen
-    private JFrame frame = new JFrame();
+    private JFrame frame;
 
     // mouse state
     private boolean isMousePressed = false;
@@ -289,7 +289,7 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
         offscreen.setColor(DEFAULT_CLEAR_COLOR);
         offscreen.fillRect(0, 0, width, height);
         onscreen.setColor(DEFAULT_CLEAR_COLOR);
-        onscreen.fillRect(0, 0, width, height);
+        onscreen.fillRect(0, 0, 2*width, 2*height);
         setPenColor();
         setPenRadius();
         setFont();
@@ -532,7 +532,7 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
     }
 
     /**
-     * Sets the pen size to the default (.002).
+     * Sets the pen radius to the default (0.002).
      */
     public void setPenRadius() {
         setPenRadius(DEFAULT_PEN_RADIUS);
@@ -1040,9 +1040,9 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
             }
         }
 
-        // in case file is inside a .jar (classpath relative to StdDraw)
+        // in case file is inside a .jar (classpath relative to Draw)
         if (icon.getImageLoadStatus() != MediaTracker.COMPLETE) {
-            URL url = StdDraw.class.getResource(filename);
+            URL url = Draw.class.getResource(filename);
             if (url != null)
                 icon = new ImageIcon(url);
         }
@@ -1367,18 +1367,24 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
     }
 
     /**
-     * Saves the drawing to using the specified filename.
-     * The supported image formats are typically JPEG, PNG, GIF, TIFF, and BMP.
+     * Saves the drawing to a file in a supported file format
+     * (typically JPEG, PNG, GIF, TIFF, and BMP).
+     * The filetype extension must be {@code .jpg}, {@code .png}, {@code .gif},
+     * {@code .bmp}, or {@code .tif}.
      *
-     * @param  filename the name of the file with one of the required suffixes
+     * @param  filename the name of the file
      * @throws IllegalArgumentException if {@code filename} is {@code null}
      */
     public void save(String filename) {
         validateNotNull(filename, "filename");
         if (filename.length() == 0) throw new IllegalArgumentException("argument to save() is the empty string");
         File file = new File(filename);
+
         String suffix = filename.substring(filename.lastIndexOf('.') + 1);
-        if (!filename.contains(".")) suffix = "";
+        if (!filename.contains(".") || suffix.length() == 0) {
+            System.out.printf("Error: the filename '%s' has no file extension, such as .jpg or .png\n", filename);
+            return;
+        }
 
         try {
             // if the file format supports transparency (such as PNG or GIF)
@@ -1407,7 +1413,7 @@ public final class Draw implements ActionListener, MouseListener, MouseMotionLis
         String selectedDirectory = chooser.getDirectory();
         String selectedFilename = chooser.getFile();
         if (selectedDirectory != null && selectedFilename != null) {
-            StdDraw.save(selectedDirectory + selectedFilename);
+            save(selectedDirectory + selectedFilename);
         }
     }
 
